@@ -1,0 +1,92 @@
+#include "Zombie.h"
+#include <map>
+
+// 【僵尸属性总表】
+// 【C：在这个表里添加相关数据
+// 从网上找图片下载到assets文件夹中，重命名，并在这里填写路径，设置移动速度等】
+static std::map<ZombieType, ZombieData> g_ZombieConfig = {
+	// 类型            血量  移速   攻击力  攻击间隔 图片路径
+	{ NORMAL_ZOMBIE, { 100,  0.5f,  20,     1.0f,    "assets/normal_zombie.png" } },	//根据具体路径改一下，这里仅是示例
+	{ CONE_ZOMBIE,   { 200,  0.4f,  20,     1.0f,    "assets/cone_zombie.png"   } }
+};
+
+Zombie* Zombie::create(ZombieType type, int x, int y, int w, int h)
+{
+    Zombie* z = new Zombie();
+    z->setType(type);
+    if (z->init(x, y, w, h)) return z;
+
+    delete z;
+    return nullptr;
+}
+
+bool Zombie::init(int x, int y, int w, int h)
+{
+	m_x = x;
+	m_y = y;
+	m_width = w;
+	m_height = h;
+	m_moveTimer = 0;
+	m_isEating = false;   // 默认在走路
+	m_attackTimer = 0;    // 攻击计时器归零
+
+	// 1. 从配置表中查出当前僵尸品种的数据
+	ZombieData data = g_ZombieConfig[m_type];
+
+	// 2. 抄写蓝图数据到自己的私有变量身上
+	m_hp = data.maxHp;
+	m_moveSpeed = data.moveSpeed;
+
+	// 3. 抄写攻击属性
+	m_attackDamage = data.attackDamage;
+	m_attackInterval = data.attackInterval;
+
+	// 4. 自动加载对应的图片
+	if (!loadimage(&m_img, data.imgPath, w, h))
+	{
+		printf("图片加载失败：%s\n", data.imgPath);
+		return false;
+	}
+
+	return true;
+}
+
+void Zombie::drawTick()
+{
+	putimage(m_x, m_y, &m_img);
+}
+
+void Zombie::eventTick(float delta)
+{
+	if (isDead())return;
+
+	// 如果正在啃食，就不走路了！
+	if (m_isEating) return;
+
+	float sec = delta / 1000.0f;  //将毫秒转换为秒
+	m_moveTimer += sec;
+
+	if (m_moveTimer >= m_moveSpeed) {
+		m_moveTimer = 0;
+		m_x -= 1;	// 僵尸向左走
+	}
+}
+
+void Zombie::setType(ZombieType type)
+{
+	m_type = type;
+}
+
+int Zombie::getDamage(float delta)
+{
+	float sec = delta / 1000.0f;
+	m_attackTimer += sec;
+
+	// 如果冷却时间到了，就返回攻击力，并重置计时器
+	if (m_attackTimer >= m_attackInterval) {
+		m_attackTimer = 0;
+		return m_attackDamage;
+	}
+
+	return 0;
+}
