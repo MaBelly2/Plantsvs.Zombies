@@ -1,0 +1,19 @@
+# Visual Studio 2022
+.vs/
+bin/
+obj/
+Debug/
+Release/
+*.suo
+*.user
+*.VC.db
+*.VC.opendb
+ipch/
+*.log
+*.tlog
+*.obj
+*.exe
+*.pdb
+*.ilk
+*.recipe
+*.idb
