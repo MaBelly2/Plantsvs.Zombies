@@ -6,8 +6,10 @@
 // 从网上找图片下载到assets文件夹中，重命名，并在这里填写路径，设置移动速度等】
 static std::map<ZombieType, ZombieData> g_ZombieConfig = {
 	// 类型            血量  移速   攻击力  攻击间隔 图片路径
-	{ NORMAL_ZOMBIE, { 100,  0.5f,  20,     1.0f,    "assets/normal_zombie.png" } },	//根据具体路径改一下，这里仅是示例
-	{ CONE_ZOMBIE,   { 200,  0.4f,  20,     1.0f,    "assets/cone_zombie.png"   } }
+	{ NORMAL_ZOMBIE, { 100,  0.08f,  10,     1.0f,    "assets/normal_zombie.png" } },	//根据具体路径改一下，这里仅是示例
+	{ NEWSPAPER_ZOMBIE, { 250,  0.08f,  10,     1.0f,    "assets/newspaper_zombie.png"   } },
+    {DANCING_ZOMBIE,{ 120,  0.07f,  10,     1.0f,    "assets/dancing_zombie.png"   } },
+	{BACKUP_DANCER,{80,  0.09f,  10,  1.0f,  "assets/backup_dancer.png"}}
 };
 
 Zombie* Zombie::create(ZombieType type, int x, int y, int w, int h)
@@ -29,6 +31,10 @@ bool Zombie::init(int x, int y, int w, int h)
 	m_moveTimer = 0;
 	m_isEating = false;   // 默认在走路
 	m_attackTimer = 0;    // 攻击计时器归零
+	m_hasNewspaper = true;
+	m_newspaperHp=100;      //报纸血量
+	m_danceTimer=0;       //跳舞召唤计时器
+	isdancing=false;         //是否正在召唤
 
 	// 1. 从配置表中查出当前僵尸品种的数据
 	ZombieData data = g_ZombieConfig[m_type];
@@ -65,6 +71,23 @@ void Zombie::eventTick(float delta)
 
 	float sec = delta / 1000.0f;  //将毫秒转换为秒
 	m_moveTimer += sec;
+	
+	switch (m_type) {
+	case NEWSPAPER_ZOMBIE:
+		if (m_hasNewspaper && m_newspaperHp > 0) {
+			m_newspaperHp -= getDamage(delta);
+		}
+		else if (m_hasNewspaper && m_newspaperHp <= 0) {
+			m_hasNewspaper = false;
+			
+		}
+			
+
+
+
+	}
+
+
 
 	if (m_moveTimer >= m_moveSpeed) {
 		m_moveTimer = 0;

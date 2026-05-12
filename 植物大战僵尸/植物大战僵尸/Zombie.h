@@ -5,7 +5,9 @@
 //C：根据想要添加的僵尸名称，在这里丰富枚举类型
 enum ZombieType {
 	NORMAL_ZOMBIE,	//普通僵尸
-	CONE_ZOMBIE		//路障僵尸
+	NEWSPAPER_ZOMBIE,  //报纸僵尸
+	DANCING_ZOMBIE, //舞王僵尸
+	BACKUP_DANCER,  //伴舞僵尸
 };
 
 // 定义一个僵尸数据的结构体
@@ -32,6 +34,11 @@ private:
 	int m_attackDamage;		// 攻击力
 	float m_attackTimer;	// 攻击计时器
 	float m_attackInterval; // 攻击间隔
+	bool m_hasNewspaper;    //是否在读报纸
+	int m_newspaperHp;      //报纸血量
+	int m_danceTimer;       //跳舞召唤计时器
+	int m_danceInterval;    //召唤间隔
+	bool isdancing;         //是否正在召唤
 
 public:
 	static Zombie* create(ZombieType type, int x, int y, int w, int h);
