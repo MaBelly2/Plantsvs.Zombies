@@ -8,8 +8,8 @@ static std::map<ZombieType, ZombieData> g_ZombieConfig = {
 	// 类型            血量  移速   攻击力  攻击间隔 图片路径
 	{ NORMAL_ZOMBIE, { 100,  0.08f,  10,     1.0f,    "assets/normal_zombie.png" } },	//根据具体路径改一下，这里仅是示例
 	{ NEWSPAPER_ZOMBIE, { 250,  0.08f,  10,     1.0f,    "assets/newspaper_zombie.png"   } },
-    {DANCING_ZOMBIE,{ 120,  0.07f,  10,     1.0f,    "assets/dancing_zombie.png"   } },
-	{BACKUP_DANCER,{80,  0.09f,  10,  1.0f,  "assets/backup_dancer.png"}}
+	{ DANCING_ZOMBIE,{ 120,  0.07f,  10,     1.0f,    "assets/dancing_zombie.png"   } },
+	{ BACKUP_DANCER,{ 80,  0.09f,  10,  1.0f,  "assets/backup_dancer.png"}}
 };
 
 Zombie* Zombie::create(ZombieType type, int x, int y, int w, int h)

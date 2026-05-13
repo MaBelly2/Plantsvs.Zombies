@@ -1,6 +1,7 @@
 #include "Scene.h"
-
 #include <cstdio>
+#include <mmsystem.h>
+#pragma comment(lib, "Winmm.lib")
 
 Scene* Scene::create()
 {
@@ -16,6 +17,10 @@ Scene* Scene::create()
 //把 init 当作初始化函数在使用  变成一个构造函数在使用
 bool Scene::init()
 {
+	// 播放背景音乐 (alias bgm 是给这段音频起个别名，repeat 表示循环播放)
+	mciSendString("open assets/music/bgm.mp3 alias bgm", NULL, 0, NULL);
+	mciSendString("play bgm repeat", NULL, 0, NULL);
+
 	loadimage(&m_BackgroundImg, "assets/DaytimeScene.jpg");
 
 	// ====== 加载铲子图片 ======
