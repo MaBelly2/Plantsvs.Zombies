@@ -59,18 +59,53 @@ bool Zombie::init(int x, int y, int w, int h)
 
 void Zombie::drawTick()
 {
-	putimage(m_x, m_y, &m_img);
+	// 根据状态画不同的序列帧
+	if (m_state == WALK && !m_walkFrames.empty()) putimage(m_x, m_y, &m_walkFrames[m_curFrame]);
+	else if (m_state == EAT && !m_eatFrames.empty()) putimage(m_x, m_y, &m_eatFrames[m_curFrame]);
+	else if (m_state == DIE && !m_dieFrames.empty()) putimage(m_x, m_y, &m_dieFrames[m_curFrame]);
 }
 
 void Zombie::eventTick(float delta)
 {
-	if (isDead())return;
-
-	// 如果正在啃食，就不走路了！
-	if (m_isEating) return;
+	// 如果标记为可移除，就不更新了
+	if (m_isRemovable) return;
 
 	float sec = delta / 1000.0f;  //将毫秒转换为秒
-	m_moveTimer += sec;
+
+	// 1. 状态判定（血量归零切入死亡状态）
+	if (m_hp <= 0 && m_state != DIE) {
+		setState(DIE);
+	}
+	else if (m_hp > 0) {
+		// 根据是否吃到植物切换状态
+		if (m_isEating) setState(EAT);
+		else setState(WALK);
+	}
+
+	// 2. 动画帧更新
+	m_animTimer += sec;
+	if (m_animTimer >= 0.15f) { // 假设0.15秒切一帧
+		m_animTimer = 0;
+		m_curFrame++;
+
+		// 死亡动画播到最后一帧时，不循环，标记为可清理
+		if (m_state == DIE && m_curFrame >= m_dieFrames.size()) {
+			m_curFrame = m_dieFrames.size() - 1; // 停在最后一帧（倒地）
+			m_isRemovable = true;                // 允许 Scene 把他清理掉
+		}
+		// 走路和啃食动画则循环
+		else if (m_state == WALK && m_curFrame >= m_walkFrames.size()) m_curFrame = 0;
+		else if (m_state == EAT && m_curFrame >= m_eatFrames.size()) m_curFrame = 0;
+	}
+
+	// 3. 只有走路状态才位移
+	if (m_state == WALK) {
+		m_moveTimer += sec;
+		if (m_moveTimer >= m_moveSpeed) {
+			m_moveTimer = 0;
+			m_x -= 1;
+		}
+	}
 	
 	switch (m_type) {
 	case NEWSPAPER_ZOMBIE:
@@ -112,4 +147,12 @@ int Zombie::getDamage(float delta)
 	}
 
 	return 0;
+}
+
+void Zombie::setState(ZombieState state)
+{
+	if (m_state == state) return;	// 状态没变就不管
+	m_state = state;
+	m_curFrame = 0;					// 切换状态时，动画从第0帧开始播
+	m_animTimer = 0;
 }

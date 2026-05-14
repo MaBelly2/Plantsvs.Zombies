@@ -455,7 +455,7 @@ void Scene::cleanUp()
 {
 	// 1. 清理死掉的僵尸
 	for (auto it = m_zombies.begin(); it != m_zombies.end();) {	//写法和上面不一样：避免迭代器失效  (前面是自动递增)
-		if ((*it)->isDead()) {
+		if ((*it)->isRemovable()) {
 			delete* it;					//释放内存
 			it = m_zombies.erase(it);	//从 vector 中移除，并获取下一个有效的迭代器
 		}
