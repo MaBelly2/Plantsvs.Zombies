@@ -4,10 +4,17 @@
 //僵尸类型枚举
 //C：根据想要添加的僵尸名称，在这里丰富枚举类型
 enum ZombieType {
-	NORMAL_ZOMBIE,	//普通僵尸
-	NEWSPAPER_ZOMBIE,  //报纸僵尸
-	DANCING_ZOMBIE, //舞王僵尸
-	BACKUP_DANCER,  //伴舞僵尸
+	NORMAL_ZOMBIE,		//普通僵尸
+	NEWSPAPER_ZOMBIE,	//报纸僵尸
+	DANCING_ZOMBIE,		//舞王僵尸
+	BACKUP_DANCER,		//伴舞僵尸
+};
+
+//僵尸状态枚举
+enum ZombieState {
+		WALK,
+		EAT,
+		DIE
 };
 
 // 定义一个僵尸数据的结构体
@@ -24,6 +31,17 @@ class Zombie:public GameObject
 	Zombie() = default;
 	Zombie(const Zombie&) = default;
 	Zombie& operator=(const Zombie&) = default;
+
+private:
+	ZombieState m_state = WALK;		// 默认走路
+	bool m_isRemovable = false;		// 死亡动画是否播完？播完才能从内存中清理
+
+	//动画相关
+	vector<IMAGE> m_walkFrames;
+	vector<IMAGE> m_eatFrames;
+	vector<IMAGE> m_dieFrames;
+	int m_curFrame = 0;
+	float m_animTimer = 0.0f;
 
 private:
 	ZombieType m_type;
@@ -54,5 +72,8 @@ public:
 
 	void setEating(bool eating) { m_isEating = eating; }
 	int getDamage(float delta); // 计算并返回当前帧应该造成的伤害
+
+	void setState(ZombieState state);
+	bool isRemovable() { return m_isRemovable; }
 };
 

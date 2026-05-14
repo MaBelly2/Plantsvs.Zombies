@@ -1,6 +1,9 @@
 #pragma once
 #include <easyx.h>
 #include <cstdio>
+#include <vector>
+
+using namespace std;
 
 class GameObject
 {
