@@ -79,7 +79,7 @@ void Zombie::eventTick(float delta)
 		}
 		else if (m_hasNewspaper && m_newspaperHp <= 0) {
 			m_hasNewspaper = false;
-			
+			m_moveSpeed = 0.15f;
 		}
 			
 
