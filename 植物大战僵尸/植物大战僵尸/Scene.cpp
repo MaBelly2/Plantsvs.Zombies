@@ -27,8 +27,8 @@ bool Scene::init()
 	// ====== 加载铲子图片 ======
 	// 【A：找好铲子的图片素材，放到 assets 文件夹里，并根据实际调整大小及路径】
 	// 假设槽位大小是 60x60，手里的铲子大小也是 60x60
-	loadimage(&m_ShovelSlotImg, "assets/shovel_slot.png", 60, 60);
-	loadimage(&m_ShovelImg, "assets/shovel.png", 60, 60);
+	loadimage(&m_ShovelSlotImg, "assets/PlantShovel.png", 60, 60);
+	loadimage(&m_ShovelImg, "assets/PlantShovel.png", 60, 60);
 
 	// 初始化植物
 	for (int i = 0; i < 5; ++i){
