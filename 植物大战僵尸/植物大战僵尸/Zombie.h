@@ -65,9 +65,9 @@ public:
 	}
 	void loadAllAnimation();
 	void loadAnimationFrames(std::vector<IMAGE>& frames, const char* path, int frameCount);
-	static Zombie* create(ZombieType type, int x, int y, int w, int h);
+	static Zombie* create(ZombieType type, Vec2 pos, int w, int h);
 
-	bool init(int x, int y, int w, int h)override;	//override 检查是否在重写一个虚函数
+	bool init(Vec2 pos, int w, int h) override;	//override 检查是否在重写一个虚函数
 	
 	void setPlantAhead(bool ahead) {
 		m_plantAhead = ahead;
