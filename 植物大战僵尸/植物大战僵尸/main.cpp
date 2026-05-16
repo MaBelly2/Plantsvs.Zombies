@@ -1,6 +1,7 @@
 #include <ctime>
 #include <easyx.h>
 #include "Scene.h"
+#include"GameObject.h"
 
 int main()
 {
