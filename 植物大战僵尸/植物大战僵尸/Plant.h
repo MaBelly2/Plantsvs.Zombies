@@ -5,7 +5,9 @@
 //B：根据想要添加的植物名称，在这里丰富枚举类型
 enum PlantType {
 	PEASHOOTER,	// 豌豆射手
-	SUNFLOWER	// 向日葵
+	SUNFLOWER,	// 向日葵
+	SNOWPEA,
+	WALLNUT
 };
 
 // 定义一个植物数据的结构体
