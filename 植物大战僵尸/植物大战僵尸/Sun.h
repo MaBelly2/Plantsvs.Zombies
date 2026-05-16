@@ -10,9 +10,9 @@ private:
 	bool m_isCollected;   // 是否已被收集（用于删除标记）
 
 public:
-	static Sun* create(int x, int y, int targetY);
+	static Sun* create(Vec2 pos, int targetY);
 
-	bool init(int x, int y, int w, int h) override; // 这里参数w,h在create里固定
+	bool init(Vec2 pos, int w, int h) override; // 这里参数w,h在create里固定
 	void drawTick() override;
 	void eventTick(float delta) override;
 

@@ -12,20 +12,19 @@ static std::map<ZombieType, ZombieData> g_ZombieConfig = {
 	{ BACKUP_DANCER,{ 80,  0.09f,  10,  1.0f,  "assets/backup_dancer.png"}}
 };
 
-Zombie* Zombie::create(ZombieType type, int x, int y, int w, int h)
+Zombie* Zombie::create(ZombieType type, Vec2 pos, int w, int h)
 {
     Zombie* z = new Zombie();
     z->setType(type);
-    if (z->init(x, y, w, h)) return z;
+    if (z->init(pos, w, h)) return z;
 
     delete z;
     return nullptr;
 }
 
-bool Zombie::init(int x, int y, int w, int h)
+bool Zombie::init(Vec2 pos, int w, int h)
 {
-	m_x = x;
-	m_y = y;
+	m_pos = pos;
 	m_width = w;
 	m_height = h;
 	m_moveTimer = 0;
@@ -60,9 +59,9 @@ bool Zombie::init(int x, int y, int w, int h)
 void Zombie::drawTick()
 {
 	// 根据状态画不同的序列帧
-	if (m_state == WALK && !m_walkFrames.empty()) putimage(m_x, m_y, &m_walkFrames[m_curFrame]);
-	else if (m_state == EAT && !m_eatFrames.empty()) putimage(m_x, m_y, &m_eatFrames[m_curFrame]);
-	else if (m_state == DIE && !m_dieFrames.empty()) putimage(m_x, m_y, &m_dieFrames[m_curFrame]);
+	if (m_state == WALK && !m_walkFrames.empty()) putimage(m_pos.x, m_pos.y, &m_walkFrames[m_curFrame]);
+	else if (m_state == EAT && !m_eatFrames.empty()) putimage(m_pos.x, m_pos.y, &m_eatFrames[m_curFrame]);
+	else if (m_state == DIE && !m_dieFrames.empty()) putimage(m_pos.x, m_pos.y, &m_dieFrames[m_curFrame]);
 }
 
 void Zombie::eventTick(float delta)
@@ -103,7 +102,7 @@ void Zombie::eventTick(float delta)
 		m_moveTimer += sec;
 		if (m_moveTimer >= m_moveSpeed) {
 			m_moveTimer = 0;
-			m_x -= 1;
+			m_pos.x -= 1;
 		}
 	}
 	
@@ -126,7 +125,7 @@ void Zombie::eventTick(float delta)
 
 	if (m_moveTimer >= m_moveSpeed) {
 		m_moveTimer = 0;
-		m_x -= 1;	// 僵尸向左走
+		m_pos.x -= 1;	// 僵尸向左走
 	}
 }
 

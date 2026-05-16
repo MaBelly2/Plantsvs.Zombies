@@ -2,14 +2,14 @@
 #include <easyx.h>
 #include <cstdio>
 #include <vector>
+#include "Vec2.h"
 
 using namespace std;
 
 class GameObject
 {
 protected:
-	int m_x;		//实体x坐标
-	int m_y;		//实体y坐标
+	Vec2 m_pos;
 	int m_width;	//实体宽度
 	int m_height;	//实体高度
 	int m_hp;		//血量
@@ -20,17 +20,22 @@ protected:
 
 public:
 	virtual ~GameObject() = default;
+
 	//统一初始化接口
-	virtual bool init(int x, int y, int w, int h) = 0;
+	virtual bool init(Vec2 pos, int w, int h) = 0;
 	
 	//统一帧接口
 	virtual void drawTick() = 0;
 	virtual void eventTick(float delta) = 0;
 
-	int getX()const { return m_x; }
-	int getY()const { return m_y; }
+	Vec2 getPos() const { return m_pos; }
+	int getX() const { return (int)m_pos.x; }
+	int getY() const { return (int)m_pos.y; }
+
 	int getWidth()const { return m_width; }
 	int getHeight()const { return m_height; }
 	int getHp()const { return m_hp; }
+
 	void setHp(int hp) { m_hp = hp; }
+	void setPos(Vec2 pos) { m_pos = pos; } // 设置坐标接口
 };

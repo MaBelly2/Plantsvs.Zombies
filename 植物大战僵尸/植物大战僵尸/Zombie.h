@@ -59,9 +59,9 @@ private:
 	bool isdancing;         //是否正在召唤
 
 public:
-	static Zombie* create(ZombieType type, int x, int y, int w, int h);
+	static Zombie* create(ZombieType type, Vec2 pos, int w, int h);
 
-	bool init(int x, int y, int w, int h)override;	//override 检查是否在重写一个虚函数
+	bool init(Vec2 pos, int w, int h)override;	//override 检查是否在重写一个虚函数
 	void drawTick()override;
 	void eventTick(float delta)override;
 

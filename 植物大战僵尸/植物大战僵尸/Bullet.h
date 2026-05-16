@@ -28,9 +28,9 @@ private:
     bool m_isActive = true; //Ä¬ÈÏ´æ»î
 
 public:
-    static Bullet* create(BulletType type, int x, int y, int w, int h);
+    static Bullet* create(BulletType type, Vec2 pos, int w, int h);
 
-    bool init(int x, int y, int w, int h) override;
+    bool init(Vec2 pos, int w, int h) override;
     void drawTick() override;
     void eventTick(float delta) override;
 

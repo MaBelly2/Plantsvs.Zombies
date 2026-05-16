@@ -32,9 +32,9 @@ private:
 	bool m_shouldSpawnSun = false;	// 阳光信号灯
 	
 public:
-	static Plant* create(PlantType type, int x, int y, int w, int h);
+	static Plant* create(PlantType type, Vec2 pos, int w, int h);
 
-	bool init(int x, int y, int w, int h)override;	//override 检查是否在重写一个虚函数
+	bool init(Vec2 pos, int w, int h)override;	//override 检查是否在重写一个虚函数
 	void drawTick()override;
 	void eventTick(float delta)override;
 
