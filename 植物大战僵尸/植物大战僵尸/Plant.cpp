@@ -9,21 +9,20 @@ static std::map<PlantType, PlantData> g_PlantConfig = {
 	{ SUNFLOWER,  { 50,  100, 5.0f, 7.5f,"assets/PlantAnimation/Sunflower/Idle/%d.png", 10 } }
 };
 
-Plant* Plant::create(PlantType type, int x, int y, int w, int h)
+Plant* Plant::create(PlantType type, Vec2 pos, int w, int h)
 {
 	Plant* plant = new Plant();
 	plant->setType(type);
 
-	if (plant->init(x, y, w, h)) return plant;
+	if (plant->init(pos, w, h)) return plant;
 
 	delete plant;
 	return nullptr;
 }
 
-bool Plant::init(int x, int y, int w, int h)
+bool Plant::init(Vec2 pos, int w, int h)
 {
-	m_x = x;
-	m_y = y;
+	m_pos = pos;
 	m_width = w;
 	m_height = h;
 	m_hp = 100;
@@ -54,7 +53,7 @@ void Plant::drawTick()
 {
 	// 画出当前帧的图片
 	if (!m_idleFrames.empty()) {
-		putimage(m_x, m_y, &m_idleFrames[m_curFrame]);
+		putimage(m_pos.x, m_pos.y, &m_idleFrames[m_curFrame]);
 	}
 }
 

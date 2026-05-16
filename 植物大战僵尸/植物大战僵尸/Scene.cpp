@@ -175,7 +175,7 @@ void Scene::eventTick(float delta)
 
 			// 在屏幕最右侧外一点点（1280）生成僵尸
 			//【D：】
-			Zombie* z = Zombie::create(NORMAL_ZOMBIE, 1280, spawnY, 80, 100);
+			Zombie* z = Zombie::create(NORMAL_ZOMBIE, Vec2(1280, spawnY), 80, 100);
 			if (z) {
 				m_zombies.push_back(z);
 			}
@@ -196,7 +196,7 @@ void Scene::eventTick(float delta)
 		//【D：根据实际情况调整】
 		int spawnX = rand() % (1280 - 80); // 随机横坐标
 		int targetY = 200 + rand() % 300;  // 随机掉落高度
-		m_suns.push_back(Sun::create(spawnX, -80, targetY));
+		m_suns.push_back(Sun::create(Vec2(spawnX, -80), targetY));
 	}
 
 	// 2. 更新阳光逻辑并清理过期的
@@ -277,7 +277,7 @@ void Scene::eventTick(float delta)
 								int plantY = 80 + row * 100;
 
 								// 3. 种下植物！
-								m_PlantTable[row][col] = Plant::create(m_holdingType, plantX, plantY, 80, 100);
+								m_PlantTable[row][col] = Plant::create(m_holdingType, Vec2(plantX, plantY), 80, 100);
 								m_cardCDTimers[m_holdingType] = Plant::getCardCooldown(m_holdingType);		// 种下后，对应植物卡片进入冷却！
 								
 								// 4. 重置状态
@@ -331,14 +331,14 @@ void Scene::eventTick(float delta)
 				if (p->shouldFire()) {
 					// 创建子弹，起始坐标设为植物中心偏右
 					//【D：根据实际情况调整参数】
-					Bullet* b = Bullet::create(NORMAL_BULLET, p->getX() + 40, p->getY() + 20, 30, 30);
+					Bullet* b = Bullet::create(NORMAL_BULLET, Vec2(p->getX() + 40, p->getY() + 20), 30, 30);
 					m_bullets.push_back(b);	//把薪子弹放到列表末尾
 					p->resetFireFlag();		// 射完了，把旗子放下来
 				}
 				if (p->getType() == SUNFLOWER && p->shouldSpawnSun()) {
 					// 在向日葵旁边弹出一个阳光
 					// 目标高度设为植物脚下附近
-					m_suns.push_back(Sun::create(p->getX() + 20, p->getY(), p->getY() + 40));
+					m_suns.push_back(Sun::create(Vec2(p->getX() + 20, p->getY()), p->getY() + 40));
 					p->resetSunFlag();
 				}
 			}

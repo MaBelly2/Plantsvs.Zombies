@@ -10,18 +10,18 @@ static std::map<BulletType, BulletData> g_BulletConfig = {
 	{ ICE_BULLET,    { 20,     600.0f,          "assets/ice_bullet.jpg"    } }
 };
 
-Bullet* Bullet::create(BulletType type, int x, int y, int w, int h)
+Bullet* Bullet::create(BulletType type, Vec2 pos, int w, int h)
 {
     Bullet* b = new Bullet();
-    if (b->init(x, y, w, h)) return b;
+    b->setType(type);
+    if (b->init(pos, w, h)) return b;
     delete b;
     return nullptr;
 }
 
-bool Bullet::init(int x, int y, int w, int h)
+bool Bullet::init(Vec2 pos, int w, int h)
 {
-    m_x = x;
-    m_y = y;
+    m_pos = pos;    // 统一赋值
     m_width = w;
     m_height = h;
     m_speed = 0.1f;
@@ -45,16 +45,16 @@ bool Bullet::init(int x, int y, int w, int h)
 
 void Bullet::drawTick()
 {
-	putimage(m_x, m_y, &m_img);
+	putimage((int)m_pos.x, (int)m_pos.y, &m_img);
 }
 
 void Bullet::eventTick(float delta)
 {
 	float sec = delta / 1000.0f;
-	m_x += m_speed * sec; // 向右飞
+    m_pos.x += m_speed * sec; // 向右飞
 }
 
 bool Bullet::isOutOfScreen()
 {
-	return m_x > 1280;
+    return m_pos.x > 1280;
 }
