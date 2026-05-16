@@ -21,7 +21,9 @@ class Scene
 private:
 	//把构造函数和拷贝构造封掉,使创建对象只能通过给的接口进行创建
 	Scene() = default;
-	Scene(Scene&) = default;
+	Scene(const Scene&) = delete;
+	Scene& operator=(const Scene&) = delete;
+
 private:
 	IMAGE m_BackgroundImg;		//背景图片
 
@@ -31,8 +33,7 @@ private:
 	Plant* m_PlantTable[5][9];	//植物表格 这里只能指针 因为构造函数被封了
 	vector<Zombie*> m_zombies;	//添加容器存放活动的僵尸和子弹
 	vector<Bullet*> m_bullets;
-	int m_sum;					//阳光数量
-
+	
 	map<PlantType, float> m_cardCDTimers;// 记录每张卡片当前剩余的冷却时间（0代表可用）
 
 	// 胜负判定相关的变量

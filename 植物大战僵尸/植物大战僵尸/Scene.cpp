@@ -22,7 +22,7 @@ bool Scene::init()
 	mciSendString("open assets/music/bgm.mp3 alias bgm", NULL, 0, NULL);
 	mciSendString("play bgm repeat", NULL, 0, NULL);
 
-	loadimage(&m_BackgroundImg, "assets/DaytimeScene.jpg");
+	loadimage(&m_BackgroundImg, "assets/DaytimeBackground.jpg", 1280, 720);
 
 	// ====== 加载铲子图片 ======
 	// 【A：找好铲子的图片素材，放到 assets 文件夹里，并根据实际调整大小及路径】
