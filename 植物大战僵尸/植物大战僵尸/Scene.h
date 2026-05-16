@@ -6,6 +6,7 @@
 #include "Zombie.h"
 #include "Bullet.h"
 #include "Sun.h"
+#include "Lawnmower.h"
 using namespace std;
 
 // 游戏当前状态枚举
@@ -47,28 +48,31 @@ public:
 	//绘制更新
 	void drawTick();
 	//处理事件
-	void eventTick(float delta);  //当作计时器使用
+	void eventTick(float delta);		//当作计时器使用
 
 private:
 	void checkCollision(float delta);	//碰撞检测
-	void cleanUp();			//内存清理（垃圾回收）
+	void cleanUp();						//内存清理（垃圾回收）
 
 private:
-	int m_sun;				// 玩家当前的阳光数量
-	bool m_isHoldingPlant;	// 玩家手里是否正拿着植物卡片准备种
-	PlantType m_holdingType;// 玩家手里拿的是什么植物
+	int m_sun;							// 玩家当前的阳光数量
+	bool m_isHoldingPlant;				// 玩家手里是否正拿着植物卡片准备种
+	PlantType m_holdingType;			// 玩家手里拿的是什么植物
 
-	bool m_isHoldingShovel;	// 铲子状态变量
+	bool m_isHoldingShovel;				// 铲子状态变量
 
 	// 辅助函数：将鼠标的像素坐标（x,y) 转换成网格的二维数组下标 [row][col]
 	bool getGridIndex(int x, int y, int& row, int& col);
 
-	float m_zombieTimer = 0;      // 距离下次刷怪的累计时间
-	float m_zombieInterval = 5.0f; // 刷怪间隔（比如5秒一只）
+	float m_zombieTimer = 0;			// 距离下次刷怪的累计时间
+	float m_zombieInterval = 5.0f;		// 刷怪间隔（比如5秒一只）
 
 private:
 	std::vector<Sun*> m_suns;
-	float m_skySunTimer = 0;    // 天空掉落计时器
-	float m_skySunInterval = 10.0f; // 每10秒掉一个
+	float m_skySunTimer = 0;			// 天空掉落计时器
+	float m_skySunInterval = 10.0f;		// 每10秒掉一个
+
+private:
+	Lawnmower* m_lawnmowers[5];			// 存储 5 行的推车
 };
 
