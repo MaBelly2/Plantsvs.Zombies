@@ -6,7 +6,7 @@
 // 从网上找图片下载到assets文件夹中，重命名，并在这里填写路径，设置移动速度等】
 static std::map<ZombieType, ZombieData> g_ZombieConfig = {
 	// 类型            血量  移速   攻击力  攻击间隔 图片路径
-	{ NORMAL_ZOMBIE, { 100,0.02f,10,2.0f,"assets/Zombies/Normal Zombies" } },	//���ݾ���·����һ�£��������ʾ��
+	{ NORMAL_ZOMBIE, { 100,0.02f,10,2.0f,"assets/Zombies/Normal Zombies" } },	//根据具体路径改一下，这里仅是示例
 	{ FOOTBALL_ZOMBIE, { 800,0.04f,10,2.0f,"assets/Zombies/Football Zombies" } },
 	{ POLE_VAULTING_ZOMBIE, { 100,0.08f,10,2.0f,"assets/Zombies/Pole Vaulting Zombies" } },
 };
@@ -96,7 +96,7 @@ void Zombie::loadAnimationFrames(vector<IMAGE>& frames, const char* pathFormat, 
 
 void Zombie::drawTick()
 {
-	// ����״̬����ͬ������֡
+	// 根据状态画不同的序列帧
 
 	if (m_state == EAT && !m_eatFrames.empty()) {
 		bool useSpecialEat = false;
@@ -107,14 +107,14 @@ void Zombie::drawTick()
 			useSpecialEat = false;
 		}
 		if (useSpecialEat == true && !m_eatSpecialFrames.empty()) {
-			putimage(m_x, m_y, &m_eatSpecialFrames[m_curFrame]);
+			putimage(m_pos.x, m_pos.y, &m_eatSpecialFrames[m_curFrame]);
 		}
 		else if (!m_eatFrames.empty()) {
-			putimage(m_x, m_y, &m_eatFrames[m_curFrame]);
+			putimage(m_pos.x, m_pos.y, &m_eatFrames[m_curFrame]);
 		}
 
 	}
-	else if (m_state == DIE && !m_dieFrames.empty()) putimage(m_x, m_y, &m_dieFrames[m_curFrame]);
+	else if (m_state == DIE && !m_dieFrames.empty()) putimage(m_pos.x, m_pos.y, &m_dieFrames[m_curFrame]);
 	else if (m_state == WALK) {
 		bool useSpecialWalk = false;
 		if (m_type == FOOTBALL_ZOMBIE && m_hashelmet == false) {
@@ -127,15 +127,15 @@ void Zombie::drawTick()
 			useSpecialWalk = false;
 		}
 		if (useSpecialWalk == true && !m_walkSpecialFrames.empty()) {
-			putimage(m_x, m_y, &m_walkSpecialFrames[m_curFrame]);
+			putimage(m_pos.x, m_pos.y, &m_walkSpecialFrames[m_curFrame]);
 		}
 		else if (!m_walkFrames.empty()) {
-			putimage(m_x, m_y, &m_walkFrames[m_curFrame]);
+			putimage(m_pos.x, m_pos.y, &m_walkFrames[m_curFrame]);
 		}
 	}
 	else if (m_state == JUMP) {
 		if (!m_jumpFrames.empty()) {
-			putimage(m_x, m_y, &m_jumpFrames[m_curFrame]);
+			putimage(m_pos.x, m_pos.y, &m_jumpFrames[m_curFrame]);
 
 		}
 
@@ -147,8 +147,8 @@ void Zombie::getGridPosition(int& row, int& col) {
 	const int CELL_WIDTH = 80;
 	const int CELL_HEIGHT = 100;
 
-	int centerX = m_x + m_width / 2;
-	int centerY = m_y + m_height / 2;
+	int centerX = m_pos.x + m_width / 2;
+	int centerY = m_pos.y + m_height / 2;
 
 	col = (centerX - GRID_START_X) / CELL_WIDTH;
 	row = (centerY - GRID_START_Y) / CELL_HEIGHT;
@@ -205,7 +205,7 @@ void Zombie::eventTick(float delta)
 				if (m_moveTimer >= m_moveSpeed * 3) {
 
 					m_moveTimer = 0;
-					m_x -= 3;
+					m_pos.x -= 3;
 				}
 			}
 			else if (m_state == WALK) {
@@ -220,7 +220,7 @@ void Zombie::eventTick(float delta)
 				}
 				if (m_moveTimer >= speed) {
 					m_moveTimer = 0;
-					m_x -= 1;
+					m_pos.x -= 1;
 				}
 			}
 
@@ -237,16 +237,16 @@ void Zombie::eventTick(float delta)
 			setState(WALK);
 
 
-		// 2. ����֡����
+		// 2. 动画帧更新
 		m_animTimer += sec;
-		if (m_animTimer >= 0.15f) { // ����0.15����һ֡
+		if (m_animTimer >= 0.15f) { // 假设0.15秒切一帧
 			m_animTimer = 0;
 			m_curFrame++;
 			if (m_state == DIE && m_curFrame >= m_dieFrames.size()) {
-				m_curFrame = m_dieFrames.size() - 1; // ͣ�����һ֡�����أ�
-				m_isRemovable = true;                // ���� Scene ����������
+				m_curFrame = m_dieFrames.size() - 1; // 停在最后一帧（倒地）
+				m_isRemovable = true;                // 允许 Scene 把他清理掉
 			}
-			// ��·�Ϳ�ʳ������ѭ��
+			// 死亡动画播到最后一帧时，不循环，标记为可清理
 			else if (m_state == WALK && m_curFrame >= m_walkFrames.size()) m_curFrame = 0;
 			else if (m_state == EAT && m_curFrame >= m_eatFrames.size()) m_curFrame = 0;
 
@@ -258,7 +258,7 @@ void Zombie::eventTick(float delta)
 			m_moveTimer += sec;
 			if (m_moveTimer >= m_moveSpeed) {
 				m_moveTimer = 0;
-				m_x -= 1;
+				m_pos.x -= 1;
 			}
 		}
 	}
