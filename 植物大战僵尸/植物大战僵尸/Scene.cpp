@@ -1,4 +1,5 @@
 #include "Scene.h"
+#include"Zombie.h"
 #include <cstdio>
 #include <mmsystem.h>
 #pragma comment(lib, "Winmm.lib")
@@ -449,8 +450,18 @@ void Scene::checkCollision(float delta)
 			zombie->setEating(false);
 		}
 	}
+	for (auto zombie : m_zombies) {
+		//检查撑杆僵尸前一格是否有植物
+		if (zombie->getType() == POLE_VAULTING_ZOMBIE) {
+			int zombieRow, zombieCol;
+			zombie->getGridPosition(zombieRow, zombieCol);
+			int frontCol = zombieCol - 1;
+			if (frontCol >= 0 && m_PlantTable[zombieRow][frontCol] != nullptr) {
+				zombie->setPlantAhead(true);
+			}
+		}
+	}
 }
-
 void Scene::cleanUp()
 {
 	// 1. 清理死掉的僵尸
