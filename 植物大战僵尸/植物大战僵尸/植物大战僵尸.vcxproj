@@ -125,6 +125,7 @@
   <ItemGroup>
     <ClCompile Include="Bullet.cpp" />
     <ClCompile Include="GameObject.cpp" />
+    <ClCompile Include="Lawnmower.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Plant.cpp" />
     <ClCompile Include="Scene.cpp" />
@@ -135,6 +136,7 @@
   <ItemGroup>
     <ClInclude Include="Bullet.h" />
     <ClInclude Include="GameObject.h" />
+    <ClInclude Include="Lawnmower.h" />
     <ClInclude Include="Plant.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="Sun.h" />

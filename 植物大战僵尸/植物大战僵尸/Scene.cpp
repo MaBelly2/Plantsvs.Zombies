@@ -27,8 +27,8 @@ bool Scene::init()
 	// ====== 加载铲子图片 ======
 	// 【A：找好铲子的图片素材，放到 assets 文件夹里，并根据实际调整大小及路径】
 	// 假设槽位大小是 60x60，手里的铲子大小也是 60x60
-	loadimage(&m_ShovelSlotImg, "assets/shovel_slot.png", 60, 60);
-	loadimage(&m_ShovelImg, "assets/shovel.png", 60, 60);
+	loadimage(&m_ShovelSlotImg, "assets/PlantShovel.png", 60, 60);
+	loadimage(&m_ShovelImg, "assets/PlantShovel.png", 60, 60);
 
 	// 初始化植物
 	for (int i = 0; i < 5; ++i){
@@ -38,6 +38,16 @@ bool Scene::init()
 	}
 
 	m_sun = 50;					// 开局默认给 50 阳光
+
+	// 推车的初始化
+	for (int i = 0; i < 5; ++i) {
+		// 根据格子Y坐标计算推车位置 (假设房子在 x=150 的位置)
+		// 根据之前刷僵尸的公式：80 + row * 100
+		int mowerY = 80 + i * 100;
+
+		// 【D：根据背景图微调 X 坐标，让推车刚好停在草坪最左侧外】
+		m_lawnmowers[i] = Lawnmower::create(Vec2(150, mowerY), 80, 80);
+	}
 	
 	// 初始化卡片 CD 为 0
 	//【B：记得添加】
@@ -68,10 +78,15 @@ void Scene::drawTick()
 		}
 	}
 
-	//3. 绘制僵尸
+	//3. 绘制推车
+	for (int i = 0; i < 5; ++i) {
+		if (m_lawnmowers[i]) m_lawnmowers[i]->drawTick();
+	}
+
+	//4. 绘制僵尸
 	for (auto zombie : m_zombies) zombie->drawTick();	//基于范围的循环  auto 自动推导类型 zombie是容器中元素的引用/拷贝
 	
-	//4. 绘制子弹
+	//5. 绘制子弹
 	for (auto bullet : m_bullets) bullet->drawTick();
 
 	// 渲染 UI：阳光数量
@@ -186,6 +201,11 @@ void Scene::eventTick(float delta)
 			//【D：实现一个 m_zombieInterval 的递减函数，控制难度】
 			if (m_zombieInterval > 1.5f) m_zombieInterval -= 0.1f;	//简单示例，可以更复杂一点
 		}
+	}
+
+	// ====== 推车生成系统 ======
+	for (int i = 0; i < 5; ++i) {
+		if (m_lawnmowers[i]) m_lawnmowers[i]->eventTick(delta);
 	}
 
 	// ====== 阳光自动生成系统 ======
@@ -462,6 +482,35 @@ void Scene::checkCollision(float delta)
 			}
 		}
 	}
+
+	// ====== 3. 推车与僵尸的碰撞 ======
+	for (int i = 0; i < 5; ++i) {
+		Lawnmower* lm = m_lawnmowers[i];
+		if (!lm) continue; // 这行的推车如果已经用掉了，就跳过
+
+		for (auto zombie : m_zombies) {
+			if (zombie->isDead()) continue;
+
+			// AABB 矩形碰撞检测
+			bool isOverlap = !(
+				lm->getPos().x + lm->getWidth() < zombie->getPos().x ||
+				zombie->getPos().x + zombie->getWidth() < lm->getPos().x ||
+				lm->getPos().y + lm->getHeight() < zombie->getPos().y ||
+				zombie->getPos().y + zombie->getHeight() < lm->getPos().y
+				);
+
+			if (isOverlap) {
+				// 如果推车还没动，触发它！
+				if (!lm->isMoving()) {
+					lm->trigger();
+				}
+
+				// 只要发生了碰撞（不管是刚触发还是推车正在冲锋），僵尸直接秒杀！
+				zombie->setHp(0);
+				// 如果想让秒杀的僵尸直接灰飞烟灭，也可以在这里直接修改僵尸的状态为DIE
+			}
+		}
+	}
 }
 void Scene::cleanUp()
 {
@@ -484,6 +533,14 @@ void Scene::cleanUp()
 		}
 		else {
 			++it;
+		}
+	}
+
+	// 3. 清理跑出屏幕的推车
+	for (int i = 0; i < 5; ++i) {
+		if (m_lawnmowers[i] && m_lawnmowers[i]->isRemovable()) {
+			delete m_lawnmowers[i];
+			m_lawnmowers[i] = nullptr;	// 指针置空，代表这一行的推车已经被消耗掉了
 		}
 	}
 }
