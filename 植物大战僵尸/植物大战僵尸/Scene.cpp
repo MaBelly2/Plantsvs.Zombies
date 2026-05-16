@@ -470,6 +470,7 @@ void Scene::checkCollision(float delta)
 			zombie->setEating(false);
 		}
 	}
+
 	for (auto zombie : m_zombies) {
 		//检查撑杆僵尸前一格是否有植物
 		if (zombie->getType() == POLE_VAULTING_ZOMBIE) {

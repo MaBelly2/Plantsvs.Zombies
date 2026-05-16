@@ -40,13 +40,7 @@ bool Zombie::init(Vec2 pos, int w, int h)
 	// 3. 抄写攻击属性
 	m_attackDamage = data.attackDamage;
 	m_attackInterval = data.attackInterval;
-
-	//// 4. 自动加载对应的图片
-	//if (!loadimage(&m_img, data.imgPath, w, h))
-	//{
-	//	printf("图片加载失败：%s\n", data.imgPath);
-	//	return false;
-	//}
+	//上传所有图片
 	loadAllAnimation();
 	return true;
 }
@@ -112,7 +106,6 @@ void Zombie::drawTick()
 		else if (!m_eatFrames.empty()) {
 			putimage(m_pos.x, m_pos.y, &m_eatFrames[m_curFrame]);
 		}
-
 	}
 	else if (m_state == DIE && !m_dieFrames.empty()) putimage(m_pos.x, m_pos.y, &m_dieFrames[m_curFrame]);
 	else if (m_state == WALK) {
@@ -182,18 +175,20 @@ void Zombie::eventTick(float delta)
 			break;
 		}
 		case POLE_VAULTING_ZOMBIE: {
-
+			//跳跃条件判断
 			if (m_haspole && m_plantAhead && !m_hasjump && m_state != JUMP) {
 				setState(JUMP);
 				m_plantAhead = false;
 				m_hasjump = true;
 				m_curFrame = 0;
-				m_animTimer = 0;
+				m_animTimer = 0.1f;
 
 			}
+
 			if (m_state == JUMP) {
+				m_animTimer += sec;
 				if (m_animTimer >= 0.1f) {
-					m_animTimer = 0;
+					m_animTimer -=0.1f;
 					m_curFrame++;
 				}
 				if (m_curFrame >= m_jumpFrames.size()) {
@@ -201,12 +196,8 @@ void Zombie::eventTick(float delta)
 					setState(WALK);
 					m_moveSpeed *= 0.7f;
 				}
-				m_moveTimer += sec;
-				if (m_moveTimer >= m_moveSpeed * 3) {
+				//m_pos.x -= 3.0f * sec / 0.1f;
 
-					m_moveTimer = 0;
-					m_pos.x -= 3;
-				}
 			}
 			else if (m_state == WALK) {
 
