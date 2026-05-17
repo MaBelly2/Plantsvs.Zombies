@@ -14,10 +14,8 @@ bool Card::init(PlantType type, int x, int y, int w, int h, const char* imgPath)
     m_currentCD = 0.0f; // 初始开局可以直接种
 
     // 注意：请确保你的路径后缀是 .png 或 .jpg
-    if (!loadimage(&m_img, imgPath, w, h)) {
-        printf("卡片图片加载失败: %s\n", imgPath);
-        return false;
-    }
+    loadimage(&m_img, imgPath, w, h);
+
     return true;
 }
 

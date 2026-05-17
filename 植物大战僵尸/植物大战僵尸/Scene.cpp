@@ -208,7 +208,7 @@ void Scene::eventTick(float delta)
 			int row = rand() % 5;
 
 			// 【融合点】根据你的计算微调高度
-			int spawnY = 100 + row * 118 - 20;
+			int spawnY = 100 + row * 118 - 25;
 
 			Zombie* z = Zombie::create(NORMAL_ZOMBIE, Vec2(1280, spawnY), 80, 100);
 			if (z) {
@@ -335,24 +335,37 @@ void Scene::eventTick(float delta)
 			Plant* p = m_PlantTable[i][j];
 			if (p) {
 				p->eventTick(delta);
+
 				if (p->shouldFire()) {
-					// 【关键修复2】判断开火的是普通豌豆还是寒冰射手
-					BulletType bType = NORMAL_BULLET;
-					if (p->getType() == SNOWPEA) {
-						bType = ICE_BULLET;
+					// ================= 【修复点2】开火前先侦察前方是否有活僵尸 =================
+					bool hasZombieInRow = false;
+					for (auto zombie : m_zombies) {
+						int zRow, zCol;
+						zombie->getGridPosition(zRow, zCol);
+
+						// 判断条件：僵尸还没死 && 在同一行 && 僵尸X坐标在植物右边
+						if (!zombie->isDead() && zRow == i && zombie->getX() > p->getX()) {
+							hasZombieInRow = true;
+							break;
+						}
 					}
 
-					Bullet* b = Bullet::create(bType, Vec2(p->getX() + 40, p->getY() + 20), 30, 30);
+					// 只有前方有活着的僵尸，才真正生成子弹实体
+					if (hasZombieInRow) {
+						BulletType bType = NORMAL_BULLET;
+						if (p->getType() == SNOWPEA) {
+							bType = ICE_BULLET;
+						}
+						Bullet* b = Bullet::create(bType, Vec2(p->getX() + 40, p->getY() + 20), 30, 30);
+						if (b != nullptr) {
+							m_bullets.push_back(b);
+						}
+					}
 
-					if (b != nullptr) {
-						m_bullets.push_back(b);
-					}
-					else {
-						// 如果游戏控制台频繁打印这句话，说明你的子弹图片路径写错了，或者图片格式不支持
-						printf("警告：子弹创建失败，跳过本次射击\n");
-					}
+					// 无论是否真正射出去了，都要把开火旗帜放下，让植物重新进入下一轮CD冷却
 					p->resetFireFlag();
 				}
+
 				if (p->getType() == SUNFLOWER && p->shouldSpawnSun()) {
 					m_suns.push_back(Sun::create(Vec2(p->getX() + 20, p->getY()), p->getY() + 40));
 					p->resetSunFlag();
@@ -423,8 +436,16 @@ void Scene::checkCollision(float delta)
 		if (zombie->isDead()) continue;
 		if (zombie->getState() == JUMP) continue;	// 如果僵尸正在跳跃，则不能啃咬植物，直接跳过
 
+		// ================= 【修复点2】获取僵尸所在的准确行 =================
+		int zRow, zCol;
+		zombie->getGridPosition(zRow, zCol);
+
 		bool isTouchingPlant = false;
 		for (int i = 0; i < 5; ++i) {
+
+			// 【关键防护】如果植物所在的行，不是僵尸所在的行，直接跳过！不让僵尸跨行吃植物！
+			if (i != zRow) continue;
+
 			for (int j = 0; j < 9; ++j) {
 				Plant* plant = m_PlantTable[i][j];
 				if (plant) {

@@ -36,12 +36,12 @@ bool Bullet::init(Vec2 pos, int w, int h)
     m_speed = data.moveSpeed;
 
 	//º”‘ÿÕº∆¨
-	if (!loadimage(&m_img, data.imgPath, w, h))
+	/*if (!loadimage(&m_img, data.imgPath, w, h))
 	{
 		printf("Õº∆¨º”‘ÿ ß∞‹£∫%s\n", data.imgPath);
 		return false;
-	}
-
+	}*/
+    loadimage(&m_img, data.imgPath, w, h);
     return true;
 }
 

@@ -132,13 +132,10 @@ void Zombie::loadAnimationFrames(vector<IMAGE*>& frames, const char* pathFormat,
 		char path[256];
 		sprintf_s(path, pathFormat, i);
 		IMAGE* img = new IMAGE();  // 【修改】：使用动态分配
-		if (loadimage(img, path, m_width, m_height)) {
-			frames.push_back(img);
-		}
-		else {
-			delete img; // 加载失败及时清理防止内存泄漏
-			printf("图片加载失败：%s\n", path);
-		}
+		
+		// 强行加载并跳过失败判定
+		loadimage(img, path);
+		frames.push_back(img); // 直接把图片塞进动画数组
 	}
 }
 
@@ -190,10 +187,11 @@ void Zombie::drawTick()
 }
 
 void Zombie::getGridPosition(int& row, int& col) {
-	const int GRID_START_X = 250;
-	const int GRID_START_Y = 80;
-	const int CELL_WIDTH = 80;
-	const int CELL_HEIGHT = 100;
+	// ================= 【修复点1】统一采用精确测量的网格刻度 =================
+	const int GRID_START_X = 105;
+	const int GRID_START_Y = 100;
+	const int CELL_WIDTH = 116;
+	const int CELL_HEIGHT = 118;
 
 	int centerX = m_pos.x + m_width / 2;
 	int centerY = m_pos.y + m_height / 2;
@@ -215,7 +213,7 @@ void Zombie::eventTick(float delta)
 
 	float sec = delta / 1000.0f;  //将毫秒转换为秒
 
-	// 【新增】减速状态倒计时逻辑
+	// 减速状态倒计时逻辑
 	if (m_slowTimer > 0) {
 		m_slowTimer -= sec;
 		if (m_slowTimer <= 0) {
@@ -232,7 +230,7 @@ void Zombie::eventTick(float delta)
 		case FOOTBALL_ZOMBIE: {
 			if (m_hashelmet && m_hp <= 400) {
 				m_hashelmet = false;
-				m_moveSpeed *= 1.5f;
+				m_moveSpeed *= 0.7f;		//m_moveSpeed 实际上是步频的冷却时间，数值越小越快
 				m_attackInterval *= 0.8f;
 				m_attackDamage *= 1.5f;
 			}
@@ -257,20 +255,12 @@ void Zombie::eventTick(float delta)
 				if (m_curFrame >= m_jumpFrames.size()) {
 					m_haspole = false;
 					setState(WALK);
-					m_moveSpeed *= 0.7f;
+					m_moveSpeed *= 1.5f;
 				}
 			}
 			else if (m_state == WALK) {
 				m_moveTimer += sec;
-				float speed;
-				if (m_haspole) {
-					speed = m_moveSpeed * 1.5f;
-				}
-				else {
-					speed = m_moveSpeed;
-				}
-
-				// 【修复点】：使用 while 防止卡顿导致的吞帧掉速
+				float speed = m_haspole ? (m_moveSpeed * 1.5f) : m_moveSpeed;
 				while (m_moveTimer >= speed) {
 					m_moveTimer -= speed;
 					m_pos.x -= 1;
@@ -278,7 +268,6 @@ void Zombie::eventTick(float delta)
 			}
 			break;
 		}
-
 		default:
 			break;
 		}
@@ -288,36 +277,36 @@ void Zombie::eventTick(float delta)
 		else if (!m_isEating && m_state == EAT)
 			setState(WALK);
 
-
-		// 2. 动画帧更新
-		// 【修复点】：如果是 JUMP 状态，跳过这个通用的动画计时器（上面已经处理过了）
-		if (m_state != JUMP) {
-			m_animTimer += sec;
-			if (m_animTimer >= 0.15f) { // 假设0.15秒切一帧
-				m_animTimer = 0;
-				m_curFrame++;
-
-				if (m_state == DIE && m_curFrame >= m_dieFrames.size()) {
-					m_curFrame = m_dieFrames.size() - 1; // 停在最后一帧（倒地）
-					m_isRemovable = true;                // 允许 Scene 把他清理掉
-				}
-				// 死亡动画播到最后一帧时，不循环，标记为可清理
-				else if (m_state == WALK && m_curFrame >= m_walkFrames.size()) {
-					m_curFrame = 0;
-				}
-				else if (m_state == EAT && m_curFrame >= m_eatFrames.size()) {
-					m_curFrame = 0;
-				}
-			}
-		}
-
-		// 3. 普通僵尸移动更新
+		// 普通僵尸移动更新（死人不能动，所以留在这里面）
 		if (m_state == WALK && m_type != POLE_VAULTING_ZOMBIE) {
 			m_moveTimer += sec;
-			// 【修复点】：使用 while 防止卡顿导致的吞帧掉速
 			while (m_moveTimer >= m_moveSpeed) {
 				m_moveTimer -= m_moveSpeed;
 				m_pos.x -= 1;
+			}
+		}
+	}
+
+	// ================= 【修复点1】将动画更新独立到外面 =================
+	// 无论僵尸活着还是死了，都要播放对应的动画！
+	if (m_state != JUMP) {
+		m_animTimer += sec;
+		if (m_animTimer >= 0.15f) { // 0.15秒切一帧
+			m_animTimer = 0;
+			m_curFrame++;
+
+			if (m_state == DIE) {
+				// 死亡动画播到最后一帧时，不循环，并标记为可清理
+				if (m_dieFrames.size() > 0 && m_curFrame >= m_dieFrames.size()) {
+					m_curFrame = m_dieFrames.size() - 1; // 停在倒地那一帧
+					m_isRemovable = true;                // 通知 Scene 把他清理掉
+				}
+			}
+			else if (m_state == WALK) {
+				if (m_walkFrames.size() > 0 && m_curFrame >= m_walkFrames.size()) m_curFrame = 0;
+			}
+			else if (m_state == EAT) {
+				if (m_eatFrames.size() > 0 && m_curFrame >= m_eatFrames.size()) m_curFrame = 0;
 			}
 		}
 	}
@@ -352,6 +341,6 @@ void Zombie::setState(ZombieState state)
 void Zombie::applySlow()
 {
 	m_slowTimer = 5.0f; // 减速持续 5 秒
-	m_moveSpeed = m_originalSpeed * 0.5f; // 速度减半
+	m_moveSpeed = m_originalSpeed * 2.0f; // 速度减半
 	// 还可以加一句变蓝的代码，如果使用了刚才提过的AlphaBlend，可以在外部加个淡蓝色遮罩，这里暂时改速度
 }

@@ -42,9 +42,10 @@ bool Plant::init(Vec2 pos, int w, int h)
 		sprintf_s(path, data.imgPathFormat, i); // 把 %d 替换成数字 0, 1, 2...
 
 		IMAGE img;
-		if (!loadimage(&img, path, w, h)) {
-			printf("图片加载失败：%s\n", path);
-		}
+
+		// 强行加载，不加 if 判断
+		loadimage(&img, path);
+
 		m_idleFrames.push_back(img);			//末尾追加一个元素
 	}
 

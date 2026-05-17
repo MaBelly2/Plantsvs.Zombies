@@ -19,9 +19,7 @@ bool Lawnmower::init(Vec2 pos, int w, int h)
     m_speed = 600.0f;     // 推车冲刺速度（像素/秒），可以调快一点
 
     // 【A：需要去网上找一个推车的素材，放到 assets 文件夹下】
-    if (!loadimage(&m_img, "assets/Lawnmower.png", w, h)) {
-        printf("图片加载失败：assets/Lawnmower.png\n");
-    }
+    loadimage(&m_img, "assets/Lawnmower.png", w, h);
 
     return true;
 }
