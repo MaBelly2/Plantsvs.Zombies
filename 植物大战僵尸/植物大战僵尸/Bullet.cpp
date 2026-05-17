@@ -6,8 +6,8 @@
 // 从网上找图片下载到assets文件夹中，重命名，并在这里填写路径，设置移动速度等】
 static std::map<BulletType, BulletData> g_BulletConfig = {
 	// 类型            攻击力  飞行速度(像素/秒)  图片路径
-	{ NORMAL_BULLET, { 20,     800.0f,          "assets/normal_bullet.jpg" } },
-	{ ICE_BULLET,    { 20,     600.0f,          "assets/ice_bullet.jpg"    } }
+	{ NORMAL_BULLET, { 20,     800.0f,          "assets/PlantAnimation/Bullet/ProjectilePea.png" } },
+	{ ICE_BULLET,    { 20,     600.0f,          "assets/PlantAnimation/Bullet/ProjectileSnowPea.png"    } }
 };
 
 Bullet* Bullet::create(BulletType type, Vec2 pos, int w, int h)
