@@ -21,6 +21,45 @@ Zombie* Zombie::create(ZombieType type, Vec2 pos, int w, int h)
 	return nullptr;
 }
 
+Zombie::~Zombie()
+{
+	// 1. 清理行走动画帧
+	for (auto img : m_walkFrames) {
+		delete img;
+	}
+	m_walkFrames.clear();
+
+	// 2. 清理特殊行走动画帧
+	for (auto img : m_walkSpecialFrames) {
+		delete img;
+	}
+	m_walkSpecialFrames.clear();
+
+	// 3. 清理攻击（吃）动画帧
+	for (auto img : m_eatFrames) {
+		delete img;
+	}
+	m_eatFrames.clear();
+
+	// 4. 清理特殊攻击动画帧
+	for (auto img : m_eatSpecialFrames) {
+		delete img;
+	}
+	m_eatSpecialFrames.clear();
+
+	// 5. 清理死亡动画帧
+	for (auto img : m_dieFrames) {
+		delete img;
+	}
+	m_dieFrames.clear();
+
+	// 6. 清理跳跃动画帧
+	for (auto img : m_jumpFrames) {
+		delete img;
+	}
+	m_jumpFrames.clear();
+}
+
 bool Zombie::init(Vec2 pos, int w, int h)
 {
 	m_pos = pos;
@@ -29,6 +68,17 @@ bool Zombie::init(Vec2 pos, int w, int h)
 	m_moveTimer = 0;
 	m_isEating = false;   // 默认在走路
 	m_attackTimer = 0;    // 攻击计时器归零
+
+	m_state = WALK;
+	m_curFrame = 0;
+	m_animTimer = 0.0f;
+	m_isRemovable = false;
+
+	// 根据僵尸类型初始化特殊状态
+	m_hashelmet = (m_type == FOOTBALL_ZOMBIE);
+	m_haspole = (m_type == POLE_VAULTING_ZOMBIE);
+	m_plantAhead = false;
+	m_hasjump = false;
 
 	// 1. 从配置表中查出当前僵尸品种的数据
 	ZombieData data = g_ZombieConfig[m_type];
@@ -55,37 +105,38 @@ void Zombie::loadAllAnimation() {
 	m_jumpFrames.clear();
 	switch (m_type) {
 	case NORMAL_ZOMBIE:
-		loadAnimationFrames(m_walkFrames, "assets/Zombies/Normal Zombies/Walking/%d.gif", 10);
-		loadAnimationFrames(m_eatFrames, "assets/Zombies/Normal Zombies/Attack/%d.gif", 10);
-		loadAnimationFrames(m_dieFrames, "assets/Zombies/Normal Zombies/Dead/%d.gif", 10);
+		loadAnimationFrames(m_walkFrames, "assets/Zombies/Normal Zombies/Walking/%d.png", 10);
+		loadAnimationFrames(m_eatFrames, "assets/Zombies/Normal Zombies/Attack/%d.png", 10);
+		loadAnimationFrames(m_dieFrames, "assets/Zombies/Normal Zombies/Dead/%d.png", 10);
 		break;
 	case FOOTBALL_ZOMBIE:
-		loadAnimationFrames(m_walkFrames, "assets/Zombies/Football Zombies/Walking/%d.gif", 10);
-		loadAnimationFrames(m_walkSpecialFrames, "assets/Zombies/Football Zombies/Helmetless Walking/%d.gif", 10);
-		loadAnimationFrames(m_eatFrames, "assets/Zombies/Football Zombies/Attack/%d.gif", 10);
-		loadAnimationFrames(m_eatSpecialFrames, "assets/Zombies/Football Zombies/Helmetless Attack/%d.gif", 10);
-		loadAnimationFrames(m_dieFrames, "assets/Zombies/Football Zombies/Dead/%d.gif", 8);
+		loadAnimationFrames(m_walkFrames, "assets/Zombies/Football Zombies/Walking/%d.png", 10);
+		loadAnimationFrames(m_walkSpecialFrames, "assets/Zombies/Football Zombies/Helmetless Walking/%d.png", 10);
+		loadAnimationFrames(m_eatFrames, "assets/Zombies/Football Zombies/Attack/%d.png", 10);
+		loadAnimationFrames(m_eatSpecialFrames, "assets/Zombies/Football Zombies/Helmetless Attack/%d.png", 10);
+		loadAnimationFrames(m_dieFrames, "assets/Zombies/Football Zombies/Dead/%d.png", 8);
 		break;
 	case POLE_VAULTING_ZOMBIE:
-		loadAnimationFrames(m_walkFrames, "assets/Zombies/Pole Vaulting Zombies/Poleless Walking/%d.gif", 10);
-		loadAnimationFrames(m_walkSpecialFrames, "assets/Zombies/Pole Vaulting Zombies/Walking/%d.gif", 10);
-		loadAnimationFrames(m_eatFrames, "assets/Zombies/Pole Vaulting Zombies/Attack/%d.gif", 10);
-		loadAnimationFrames(m_dieFrames, "assets/Zombies/Pole Vaulting Zombies/Dead/%d.gif", 10);
-		loadAnimationFrames(m_jumpFrames, "assets/Zombies/Pole Vaulting Zombies/Jump/%d.gif", 10);
+		loadAnimationFrames(m_walkFrames, "assets/Zombies/Pole Vaulting Zombies/Poleless Walking/%d.png", 10);
+		loadAnimationFrames(m_walkSpecialFrames, "assets/Zombies/Pole Vaulting Zombies/Walking/%d.png", 10);
+		loadAnimationFrames(m_eatFrames, "assets/Zombies/Pole Vaulting Zombies/Attack/%d.png", 10);
+		loadAnimationFrames(m_dieFrames, "assets/Zombies/Pole Vaulting Zombies/Dead/%d.png", 10);
+		loadAnimationFrames(m_jumpFrames, "assets/Zombies/Pole Vaulting Zombies/Jump/%d.png", 10);
 		break;
 
 	}
 }
 
-void Zombie::loadAnimationFrames(vector<IMAGE>& frames, const char* pathFormat, int frameCount) {
+void Zombie::loadAnimationFrames(vector<IMAGE*>& frames, const char* pathFormat, int frameCount) {
 	for (int i = 0; i < frameCount; ++i) {
 		char path[256];
 		sprintf_s(path, pathFormat, i);
-		IMAGE img;
-		if (loadimage(&img, path, m_width, m_height)) {
+		IMAGE* img = new IMAGE();  // 【修改】：使用动态分配
+		if (loadimage(img, path, m_width, m_height)) {
 			frames.push_back(img);
 		}
 		else {
+			delete img; // 加载失败及时清理防止内存泄漏
 			printf("图片加载失败：%s\n", path);
 		}
 	}
@@ -104,13 +155,13 @@ void Zombie::drawTick()
 			useSpecialEat = false;
 		}
 		if (useSpecialEat == true && !m_eatSpecialFrames.empty()) {
-			putimage_alpha(m_pos.x, m_pos.y, &m_eatSpecialFrames[m_curFrame]);
+			putimage_alpha(m_pos.x, m_pos.y, m_eatSpecialFrames[m_curFrame]);
 		}
 		else if (!m_eatFrames.empty()) {
-			putimage_alpha(m_pos.x, m_pos.y, &m_eatFrames[m_curFrame]);
+			putimage_alpha(m_pos.x, m_pos.y, m_eatFrames[m_curFrame]);
 		}
 	}
-	else if (m_state == DIE && !m_dieFrames.empty()) putimage(m_pos.x, m_pos.y, &m_dieFrames[m_curFrame]);
+	else if (m_state == DIE && !m_dieFrames.empty()) putimage_alpha(m_pos.x, m_pos.y, m_dieFrames[m_curFrame]);
 	else if (m_state == WALK) {
 		bool useSpecialWalk = false;
 		if (m_type == FOOTBALL_ZOMBIE && m_hashelmet == false) {
@@ -123,15 +174,15 @@ void Zombie::drawTick()
 			useSpecialWalk = false;
 		}
 		if (useSpecialWalk == true && !m_walkSpecialFrames.empty()) {
-			putimage_alpha(m_pos.x, m_pos.y, &m_walkSpecialFrames[m_curFrame]);
+			putimage_alpha(m_pos.x, m_pos.y, m_walkSpecialFrames[m_curFrame]);
 		}
 		else if (!m_walkFrames.empty()) {
-			putimage_alpha(m_pos.x, m_pos.y, &m_walkFrames[m_curFrame]);
+			putimage_alpha(m_pos.x, m_pos.y, m_walkFrames[m_curFrame]);
 		}
 	}
 	else if (m_state == JUMP) {
 		if (!m_jumpFrames.empty()) {
-			putimage_alpha(m_pos.x, m_pos.y, &m_jumpFrames[m_curFrame]);
+			putimage_alpha(m_pos.x, m_pos.y, m_jumpFrames[m_curFrame]);
 
 		}
 

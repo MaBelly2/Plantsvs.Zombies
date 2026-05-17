@@ -32,6 +32,9 @@ class Zombie:public GameObject
 	Zombie(const Zombie&) = default;
 	Zombie& operator=(const Zombie&) = default;
 
+public:
+	~Zombie();
+
 private:
 	ZombieState m_state = WALK;		// 默认走路
 	bool m_isRemovable = false;		// 死亡动画是否播完？播完才能从内存中清理
@@ -39,13 +42,14 @@ private:
 	bool m_haspole = true;
 	bool m_plantAhead = false;
 	bool m_hasjump = false;
+
 	//动画相关
-	vector<IMAGE> m_walkFrames;
-	vector<IMAGE> m_eatFrames;
-	vector<IMAGE> m_dieFrames;
-	vector<IMAGE> m_walkSpecialFrames;
-	vector<IMAGE> m_eatSpecialFrames;
-	vector<IMAGE> m_jumpFrames;
+	vector<IMAGE*> m_walkFrames;
+	vector<IMAGE*> m_walkSpecialFrames;
+	vector<IMAGE*> m_eatFrames;
+	vector<IMAGE*> m_eatSpecialFrames;
+	vector<IMAGE*> m_dieFrames;
+	vector<IMAGE*> m_jumpFrames;
 
 	int m_curFrame = 0;
 	float m_animTimer = 0.0f;
@@ -68,7 +72,7 @@ public:
 		return m_type;
 	}
 	void loadAllAnimation();
-	void loadAnimationFrames(std::vector<IMAGE>& frames, const char* path, int frameCount);
+	void loadAnimationFrames(std::vector<IMAGE*>& frames, const char* path, int frameCount);
 	static Zombie* create(ZombieType type, Vec2 pos, int w, int h);
 
 	bool init(Vec2 pos, int w, int h) override;	//override 检查是否在重写一个虚函数
