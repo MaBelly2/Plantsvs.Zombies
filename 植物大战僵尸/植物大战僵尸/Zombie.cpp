@@ -55,23 +55,23 @@ void Zombie::loadAllAnimation() {
 	m_jumpFrames.clear();
 	switch (m_type) {
 	case NORMAL_ZOMBIE:
-		loadAnimationFrames(m_walkFrames, "assets/Zombies/Normal Zombies/Walking/%d.gif", 10);
-		loadAnimationFrames(m_eatFrames, "assets/Zombies/Normal Zombies/Attack/%d.gif", 10);
-		loadAnimationFrames(m_dieFrames, "assets/Zombies/Normal Zombies/Dead/%d.gif", 10);
+		loadAnimationFrames(m_walkFrames, "assets/Zombies/Normal Zombies/Walking/%d.png", 10);
+		loadAnimationFrames(m_eatFrames, "assets/Zombies/Normal Zombies/Attack/%d.png", 10);
+		loadAnimationFrames(m_dieFrames, "assets/Zombies/Normal Zombies/Dead/%d.png", 10);
 		break;
 	case FOOTBALL_ZOMBIE:
-		loadAnimationFrames(m_walkFrames, "assets/Zombies/Football Zombies/Walking/%d.gif", 10);
-		loadAnimationFrames(m_walkSpecialFrames, "assets/Zombies/Football Zombies/Helmetless Walking/%d.gif", 10);
-		loadAnimationFrames(m_eatFrames, "assets/Zombies/Football Zombies/Attack/%d.gif", 10);
-		loadAnimationFrames(m_eatSpecialFrames, "assets/Zombies/Football Zombies/Helmetless Attack/%d.gif", 10);
-		loadAnimationFrames(m_dieFrames, "assets/Zombies/Football Zombies/Dead/%d.gif", 8);
+		loadAnimationFrames(m_walkFrames, "assets/Zombies/Football Zombies/Walking/%d.png", 10);
+		loadAnimationFrames(m_walkSpecialFrames, "assets/Zombies/Football Zombies/Helmetless Walking/%d.png", 10);
+		loadAnimationFrames(m_eatFrames, "assets/Zombies/Football Zombies/Attack/%d.png", 10);
+		loadAnimationFrames(m_eatSpecialFrames, "assets/Zombies/Football Zombies/Helmetless Attack/%d.png", 10);
+		loadAnimationFrames(m_dieFrames, "assets/Zombies/Football Zombies/Dead/%d.png", 8);
 		break;
 	case POLE_VAULTING_ZOMBIE:
-		loadAnimationFrames(m_walkFrames, "assets/Zombies/Pole Vaulting Zombies/Poleless Walking/%d.gif", 10);
-		loadAnimationFrames(m_walkSpecialFrames, "assets/Zombies/Pole Vaulting Zombies/Walking/%d.gif", 10);
-		loadAnimationFrames(m_eatFrames, "assets/Zombies/Pole Vaulting Zombies/Attack/%d.gif", 10);
-		loadAnimationFrames(m_dieFrames, "assets/Zombies/Pole Vaulting Zombies/Dead/%d.gif", 10);
-		loadAnimationFrames(m_jumpFrames, "assets/Zombies/Pole Vaulting Zombies/Jump/%d.gif", 10);
+		loadAnimationFrames(m_walkFrames, "assets/Zombies/Pole Vaulting Zombies/Poleless Walking/%d.png", 10);
+		loadAnimationFrames(m_walkSpecialFrames, "assets/Zombies/Pole Vaulting Zombies/Walking/%d.png", 10);
+		loadAnimationFrames(m_eatFrames, "assets/Zombies/Pole Vaulting Zombies/Attack/%d.png", 10);
+		loadAnimationFrames(m_dieFrames, "assets/Zombies/Pole Vaulting Zombies/Dead/%d.png", 10);
+		loadAnimationFrames(m_jumpFrames, "assets/Zombies/Pole Vaulting Zombies/Jump/%d.png", 10);
 		break;
 
 	}
