@@ -7,6 +7,7 @@
 #include "Bullet.h"
 #include "Sun.h"
 #include "Lawnmower.h"
+#include "Card.h"
 using namespace std;
 
 // 游戏当前状态枚举
@@ -21,7 +22,12 @@ class Scene
 private:
 	//把构造函数和拷贝构造封掉,使创建对象只能通过给的接口进行创建
 	Scene() = default;
-	Scene(Scene&) = default;
+	Scene(const Scene&) = delete;
+	Scene& operator=(const Scene&) = delete;
+
+public:
+	~Scene();
+
 private:
 	IMAGE m_BackgroundImg;		//背景图片
 
@@ -31,14 +37,15 @@ private:
 	Plant* m_PlantTable[5][9];	//植物表格 这里只能指针 因为构造函数被封了
 	vector<Zombie*> m_zombies;	//添加容器存放活动的僵尸和子弹
 	vector<Bullet*> m_bullets;
-	int m_sum;					//阳光数量
-
-	map<PlantType, float> m_cardCDTimers;// 记录每张卡片当前剩余的冷却时间（0代表可用）
 
 	// 胜负判定相关的变量
 	GameStatus m_status;      // 当前游戏状态
 	int m_zombiesGenerated;   // 已经生成的僵尸数量
 	int m_maxZombies;         // 本关总共需要生成的僵尸数量
+
+	vector<Card*> m_cards;
+
+	int m_sun;
 
 public:
 	static Scene* create();
@@ -55,7 +62,6 @@ private:
 	void cleanUp();						//内存清理（垃圾回收）
 
 private:
-	int m_sun;							// 玩家当前的阳光数量
 	bool m_isHoldingPlant;				// 玩家手里是否正拿着植物卡片准备种
 	PlantType m_holdingType;			// 玩家手里拿的是什么植物
 

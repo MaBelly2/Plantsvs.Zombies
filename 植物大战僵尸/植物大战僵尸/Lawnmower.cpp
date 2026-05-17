@@ -29,7 +29,7 @@ bool Lawnmower::init(Vec2 pos, int w, int h)
 void Lawnmower::drawTick()
 {
     // 向下取整渲染
-    putimage((int)m_pos.x, (int)m_pos.y, &m_img);
+    putimage_alpha((int)m_pos.x, (int)m_pos.y, &m_img);
 }
 
 void Lawnmower::eventTick(float delta)

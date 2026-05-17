@@ -40,6 +40,8 @@ bool Zombie::init(Vec2 pos, int w, int h)
 	// 3. 抄写攻击属性
 	m_attackDamage = data.attackDamage;
 	m_attackInterval = data.attackInterval;
+	m_originalSpeed = data.moveSpeed; // 【新增】保存原始速度
+
 	//上传所有图片
 	loadAllAnimation();
 	return true;
@@ -74,6 +76,7 @@ void Zombie::loadAllAnimation() {
 
 	}
 }
+
 void Zombie::loadAnimationFrames(vector<IMAGE>& frames, const char* pathFormat, int frameCount) {
 	for (int i = 0; i < frameCount; ++i) {
 		char path[256];
@@ -101,10 +104,10 @@ void Zombie::drawTick()
 			useSpecialEat = false;
 		}
 		if (useSpecialEat == true && !m_eatSpecialFrames.empty()) {
-			putimage(m_pos.x, m_pos.y, &m_eatSpecialFrames[m_curFrame]);
+			putimage_alpha(m_pos.x, m_pos.y, &m_eatSpecialFrames[m_curFrame]);
 		}
 		else if (!m_eatFrames.empty()) {
-			putimage(m_pos.x, m_pos.y, &m_eatFrames[m_curFrame]);
+			putimage_alpha(m_pos.x, m_pos.y, &m_eatFrames[m_curFrame]);
 		}
 	}
 	else if (m_state == DIE && !m_dieFrames.empty()) putimage(m_pos.x, m_pos.y, &m_dieFrames[m_curFrame]);
@@ -120,20 +123,21 @@ void Zombie::drawTick()
 			useSpecialWalk = false;
 		}
 		if (useSpecialWalk == true && !m_walkSpecialFrames.empty()) {
-			putimage(m_pos.x, m_pos.y, &m_walkSpecialFrames[m_curFrame]);
+			putimage_alpha(m_pos.x, m_pos.y, &m_walkSpecialFrames[m_curFrame]);
 		}
 		else if (!m_walkFrames.empty()) {
-			putimage(m_pos.x, m_pos.y, &m_walkFrames[m_curFrame]);
+			putimage_alpha(m_pos.x, m_pos.y, &m_walkFrames[m_curFrame]);
 		}
 	}
 	else if (m_state == JUMP) {
 		if (!m_jumpFrames.empty()) {
-			putimage(m_pos.x, m_pos.y, &m_jumpFrames[m_curFrame]);
+			putimage_alpha(m_pos.x, m_pos.y, &m_jumpFrames[m_curFrame]);
 
 		}
 
 	}
 }
+
 void Zombie::getGridPosition(int& row, int& col) {
 	const int GRID_START_X = 250;
 	const int GRID_START_Y = 80;
@@ -152,12 +156,21 @@ void Zombie::getGridPosition(int& row, int& col) {
 	if (col < 0) col = 0;
 	else if (col >= 9) col = 8;
 }
+
 void Zombie::eventTick(float delta)
 {
 	// 如果标记为可移除，就不更新了
 	if (m_isRemovable) return;
 
 	float sec = delta / 1000.0f;  //将毫秒转换为秒
+
+	// 【新增】减速状态倒计时逻辑
+	if (m_slowTimer > 0) {
+		m_slowTimer -= sec;
+		if (m_slowTimer <= 0) {
+			m_moveSpeed = m_originalSpeed; // 时间到，恢复原本速度
+		}
+	}
 
 	// 1. 状态判定（血量归零切入死亡状态）
 	if (m_hp <= 0 && m_state != DIE) {
@@ -175,20 +188,19 @@ void Zombie::eventTick(float delta)
 			break;
 		}
 		case POLE_VAULTING_ZOMBIE: {
-			//跳跃条件判断
+			// 跳跃条件判断
 			if (m_haspole && m_plantAhead && !m_hasjump && m_state != JUMP) {
 				setState(JUMP);
 				m_plantAhead = false;
 				m_hasjump = true;
 				m_curFrame = 0;
-				m_animTimer = 0.1f;
-
+				m_animTimer = 0.1f; // 保证立马切入跳跃第一帧
 			}
 
 			if (m_state == JUMP) {
 				m_animTimer += sec;
 				if (m_animTimer >= 0.1f) {
-					m_animTimer -=0.1f;
+					m_animTimer -= 0.1f;
 					m_curFrame++;
 				}
 				if (m_curFrame >= m_jumpFrames.size()) {
@@ -196,11 +208,8 @@ void Zombie::eventTick(float delta)
 					setState(WALK);
 					m_moveSpeed *= 0.7f;
 				}
-				//m_pos.x -= 3.0f * sec / 0.1f;
-
 			}
 			else if (m_state == WALK) {
-
 				m_moveTimer += sec;
 				float speed;
 				if (m_haspole) {
@@ -209,51 +218,60 @@ void Zombie::eventTick(float delta)
 				else {
 					speed = m_moveSpeed;
 				}
-				if (m_moveTimer >= speed) {
-					m_moveTimer = 0;
+
+				// 【修复点】：使用 while 防止卡顿导致的吞帧掉速
+				while (m_moveTimer >= speed) {
+					m_moveTimer -= speed;
 					m_pos.x -= 1;
 				}
 			}
-
-
 			break;
 		}
 
 		default:
 			break;
-
 		}
+
+		// 吃植物状态切换
 		if (m_isEating && m_state != JUMP) setState(EAT);
 		else if (!m_isEating && m_state == EAT)
 			setState(WALK);
 
 
 		// 2. 动画帧更新
-		m_animTimer += sec;
-		if (m_animTimer >= 0.15f) { // 假设0.15秒切一帧
-			m_animTimer = 0;
-			m_curFrame++;
-			if (m_state == DIE && m_curFrame >= m_dieFrames.size()) {
-				m_curFrame = m_dieFrames.size() - 1; // 停在最后一帧（倒地）
-				m_isRemovable = true;                // 允许 Scene 把他清理掉
-			}
-			// 死亡动画播到最后一帧时，不循环，标记为可清理
-			else if (m_state == WALK && m_curFrame >= m_walkFrames.size()) m_curFrame = 0;
-			else if (m_state == EAT && m_curFrame >= m_eatFrames.size()) m_curFrame = 0;
+		// 【修复点】：如果是 JUMP 状态，跳过这个通用的动画计时器（上面已经处理过了）
+		if (m_state != JUMP) {
+			m_animTimer += sec;
+			if (m_animTimer >= 0.15f) { // 假设0.15秒切一帧
+				m_animTimer = 0;
+				m_curFrame++;
 
-			else if (m_state == JUMP && m_curFrame >= m_jumpFrames.size()) {
-				m_curFrame = m_jumpFrames.size() - 1;
+				if (m_state == DIE && m_curFrame >= m_dieFrames.size()) {
+					m_curFrame = m_dieFrames.size() - 1; // 停在最后一帧（倒地）
+					m_isRemovable = true;                // 允许 Scene 把他清理掉
+				}
+				// 死亡动画播到最后一帧时，不循环，标记为可清理
+				else if (m_state == WALK && m_curFrame >= m_walkFrames.size()) {
+					m_curFrame = 0;
+				}
+				else if (m_state == EAT && m_curFrame >= m_eatFrames.size()) {
+					m_curFrame = 0;
+				}
 			}
 		}
+
+		// 3. 普通僵尸移动更新
 		if (m_state == WALK && m_type != POLE_VAULTING_ZOMBIE) {
 			m_moveTimer += sec;
-			if (m_moveTimer >= m_moveSpeed) {
-				m_moveTimer = 0;
+			// 【修复点】：使用 while 防止卡顿导致的吞帧掉速
+			while (m_moveTimer >= m_moveSpeed) {
+				m_moveTimer -= m_moveSpeed;
 				m_pos.x -= 1;
 			}
 		}
 	}
 }
+
 void Zombie::setType(ZombieType type){
 	m_type = type;
 }
@@ -278,4 +296,11 @@ void Zombie::setState(ZombieState state)
 	m_state = state;
 	m_curFrame = 0;					// 切换状态时，动画从第0帧开始播
 	m_animTimer = 0;
+}
+
+void Zombie::applySlow()
+{
+	m_slowTimer = 5.0f; // 减速持续 5 秒
+	m_moveSpeed = m_originalSpeed * 0.5f; // 速度减半
+	// 还可以加一句变蓝的代码，如果使用了刚才提过的AlphaBlend，可以在外部加个淡蓝色遮罩，这里暂时改速度
 }
