@@ -74,5 +74,8 @@
     <ClInclude Include="Card.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="RenderTool.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

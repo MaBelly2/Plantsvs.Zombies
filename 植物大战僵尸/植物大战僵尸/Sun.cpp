@@ -25,7 +25,7 @@ bool Sun::init(Vec2 pos, int w, int h)
 
 void Sun::drawTick()
 {
-	putimage((int)m_pos.x, (int)m_pos.y, &m_img);
+	putimage_alpha((int)m_pos.x, (int)m_pos.y, &m_img);
 }
 
 void Sun::eventTick(float delta)

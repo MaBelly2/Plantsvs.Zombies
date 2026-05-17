@@ -33,7 +33,7 @@ void Card::eventTick(float delta)
 void Card::drawTick()
 {
     // 1. 画出实体卡片（自带阳光数字）
-    putimage(m_x, m_y, &m_img);
+    putimage_alpha(m_x, m_y, &m_img);
 
     // 2. 绘制冷却遮罩层 (从下往上收缩的效果)
     if (m_currentCD > 0) {

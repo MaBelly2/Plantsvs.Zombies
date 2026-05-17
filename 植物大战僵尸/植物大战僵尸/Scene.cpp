@@ -75,7 +75,7 @@ bool Scene::init()
 void Scene::drawTick()
 {
 	// 1. 绘制背景
-	putimage(0, 0, &m_BackgroundImg);
+	putimage_alpha(0, 0, &m_BackgroundImg);
 
 	// 2. 绘制顶部的所有卡片（卡片内部自动处理冷却遮罩层）
 	for (auto card : m_cards) {
@@ -83,7 +83,7 @@ void Scene::drawTick()
 	}
 
 	// 3. 【融合点】渲染固定位置的铲子图标
-	putimage(1190, 10, &m_ShovelSlotImg);
+	putimage_alpha(1190, 10, &m_ShovelSlotImg);
 
 	// 4. 绘制植物
 	for (int i = 0; i < 5; ++i) {

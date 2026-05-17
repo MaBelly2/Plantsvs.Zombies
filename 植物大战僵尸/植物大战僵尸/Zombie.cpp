@@ -101,10 +101,10 @@ void Zombie::drawTick()
 			useSpecialEat = false;
 		}
 		if (useSpecialEat == true && !m_eatSpecialFrames.empty()) {
-			putimage(m_pos.x, m_pos.y, &m_eatSpecialFrames[m_curFrame]);
+			putimage_alpha(m_pos.x, m_pos.y, &m_eatSpecialFrames[m_curFrame]);
 		}
 		else if (!m_eatFrames.empty()) {
-			putimage(m_pos.x, m_pos.y, &m_eatFrames[m_curFrame]);
+			putimage_alpha(m_pos.x, m_pos.y, &m_eatFrames[m_curFrame]);
 		}
 	}
 	else if (m_state == DIE && !m_dieFrames.empty()) putimage(m_pos.x, m_pos.y, &m_dieFrames[m_curFrame]);
@@ -120,15 +120,15 @@ void Zombie::drawTick()
 			useSpecialWalk = false;
 		}
 		if (useSpecialWalk == true && !m_walkSpecialFrames.empty()) {
-			putimage(m_pos.x, m_pos.y, &m_walkSpecialFrames[m_curFrame]);
+			putimage_alpha(m_pos.x, m_pos.y, &m_walkSpecialFrames[m_curFrame]);
 		}
 		else if (!m_walkFrames.empty()) {
-			putimage(m_pos.x, m_pos.y, &m_walkFrames[m_curFrame]);
+			putimage_alpha(m_pos.x, m_pos.y, &m_walkFrames[m_curFrame]);
 		}
 	}
 	else if (m_state == JUMP) {
 		if (!m_jumpFrames.empty()) {
-			putimage(m_pos.x, m_pos.y, &m_jumpFrames[m_curFrame]);
+			putimage_alpha(m_pos.x, m_pos.y, &m_jumpFrames[m_curFrame]);
 
 		}
 

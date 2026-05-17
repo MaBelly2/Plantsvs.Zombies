@@ -53,7 +53,7 @@ void Plant::drawTick()
 {
 	// 画出当前帧的图片
 	if (!m_idleFrames.empty()) {
-		putimage(m_pos.x, m_pos.y, &m_idleFrames[m_curFrame]);
+		putimage_alpha(m_pos.x, m_pos.y, &m_idleFrames[m_curFrame]);
 	}
 }
 

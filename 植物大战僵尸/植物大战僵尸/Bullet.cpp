@@ -45,7 +45,7 @@ bool Bullet::init(Vec2 pos, int w, int h)
 
 void Bullet::drawTick()
 {
-	putimage((int)m_pos.x, (int)m_pos.y, &m_img);
+    putimage_alpha((int)m_pos.x, (int)m_pos.y, &m_img);
 }
 
 void Bullet::eventTick(float delta)

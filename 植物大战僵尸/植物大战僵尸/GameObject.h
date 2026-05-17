@@ -3,6 +3,7 @@
 #include <cstdio>
 #include <vector>
 #include "Vec2.h"
+#include "RenderTool.h"
 
 using namespace std;
 

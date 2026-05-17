@@ -140,6 +140,7 @@
     <ClInclude Include="GameObject.h" />
     <ClInclude Include="Lawnmower.h" />
     <ClInclude Include="Plant.h" />
+    <ClInclude Include="RenderTool.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="Sun.h" />
     <ClInclude Include="Vec2.h" />
