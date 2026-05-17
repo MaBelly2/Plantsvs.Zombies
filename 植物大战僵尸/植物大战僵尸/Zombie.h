@@ -59,6 +59,10 @@ private:
 	int m_attackDamage;		// 攻击力
 	float m_attackTimer;	// 攻击计时器
 	float m_attackInterval; // 攻击间隔
+
+	float m_slowTimer = 0.0f;	// 减速持续时间计时器
+	float m_originalSpeed;		// 记录僵尸原本的移动速度
+
 public:
 	ZombieType getType() {
 		return m_type;
@@ -86,5 +90,9 @@ public:
 
 	void setState(ZombieState state);
 	bool isRemovable() { return m_isRemovable; }
+
+	ZombieState getState() { return m_state; }
+
+	void applySlow();			// 受到冰弹攻击时调用的减速方法
 };
 

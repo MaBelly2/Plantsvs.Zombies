@@ -40,6 +40,8 @@ bool Zombie::init(Vec2 pos, int w, int h)
 	// 3. 抄写攻击属性
 	m_attackDamage = data.attackDamage;
 	m_attackInterval = data.attackInterval;
+	m_originalSpeed = data.moveSpeed; // 【新增】保存原始速度
+
 	//上传所有图片
 	loadAllAnimation();
 	return true;
@@ -74,6 +76,7 @@ void Zombie::loadAllAnimation() {
 
 	}
 }
+
 void Zombie::loadAnimationFrames(vector<IMAGE>& frames, const char* pathFormat, int frameCount) {
 	for (int i = 0; i < frameCount; ++i) {
 		char path[256];
@@ -160,6 +163,14 @@ void Zombie::eventTick(float delta)
 	if (m_isRemovable) return;
 
 	float sec = delta / 1000.0f;  //将毫秒转换为秒
+
+	// 【新增】减速状态倒计时逻辑
+	if (m_slowTimer > 0) {
+		m_slowTimer -= sec;
+		if (m_slowTimer <= 0) {
+			m_moveSpeed = m_originalSpeed; // 时间到，恢复原本速度
+		}
+	}
 
 	// 1. 状态判定（血量归零切入死亡状态）
 	if (m_hp <= 0 && m_state != DIE) {
@@ -285,4 +296,11 @@ void Zombie::setState(ZombieState state)
 	m_state = state;
 	m_curFrame = 0;					// 切换状态时，动画从第0帧开始播
 	m_animTimer = 0;
+}
+
+void Zombie::applySlow()
+{
+	m_slowTimer = 5.0f; // 减速持续 5 秒
+	m_moveSpeed = m_originalSpeed * 0.5f; // 速度减半
+	// 还可以加一句变蓝的代码，如果使用了刚才提过的AlphaBlend，可以在外部加个淡蓝色遮罩，这里暂时改速度
 }

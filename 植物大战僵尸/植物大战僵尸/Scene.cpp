@@ -330,8 +330,21 @@ void Scene::eventTick(float delta)
 			if (p) {
 				p->eventTick(delta);
 				if (p->shouldFire()) {
-					Bullet* b = Bullet::create(NORMAL_BULLET, Vec2(p->getX() + 40, p->getY() + 20), 30, 30);
-					m_bullets.push_back(b);
+					// 【关键修复2】判断开火的是普通豌豆还是寒冰射手
+					BulletType bType = NORMAL_BULLET;
+					if (p->getType() == SNOWPEA) {
+						bType = ICE_BULLET;
+					}
+
+					Bullet* b = Bullet::create(bType, Vec2(p->getX() + 40, p->getY() + 20), 30, 30);
+
+					if (b != nullptr) {
+						m_bullets.push_back(b);
+					}
+					else {
+						// 如果游戏控制台频繁打印这句话，说明你的子弹图片路径写错了，或者图片格式不支持
+						printf("警告：子弹创建失败，跳过本次射击\n");
+					}
 					p->resetFireFlag();
 				}
 				if (p->getType() == SUNFLOWER && p->shouldSpawnSun()) {
@@ -387,6 +400,12 @@ void Scene::checkCollision(float delta)
 
 			if (isOverlap) {
 				zombie->setHp(zombie->getHp() - bullet->getAttack());
+
+				// 【关键修复3】如果是冰弹，就给僵尸挂上减速 Buff
+				if (bullet->getType() == ICE_BULLET) {
+					zombie->applySlow();
+				}
+
 				bullet->setActive(false);
 				break;
 			}
@@ -396,6 +415,7 @@ void Scene::checkCollision(float delta)
 	// 2. 僵尸吃植物
 	for (auto zombie : m_zombies) {
 		if (zombie->isDead()) continue;
+		if (zombie->getState() == JUMP) continue;	// 如果僵尸正在跳跃，则不能啃咬植物，直接跳过
 
 		bool isTouchingPlant = false;
 		for (int i = 0; i < 5; ++i) {

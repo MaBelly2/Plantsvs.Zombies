@@ -6,7 +6,9 @@
 // 从网上找图片下载到assets文件夹中，重命名，并在这里填写路径，设置移动速度等】
 static std::map<PlantType, PlantData> g_PlantConfig = {
 	{ PEASHOOTER, { 100, 100, 1.5f, 7.5f,"assets/PlantAnimation/Peashooter/Idle/%d.png",10 } },	//根据具体路径改一下，这里仅是示例
-	{ SUNFLOWER,  { 50,  100, 5.0f, 7.5f,"assets/PlantAnimation/Sunflower/Idle/%d.png", 10 } }
+	{ SUNFLOWER,  { 50,  100, 5.0f, 7.5f,"assets/PlantAnimation/Sunflower/Idle/%d.png", 10 } },
+	{ SNOWPEA,    { 175, 100, 1.5f, 7.5f, "assets/PlantAnimation/SnowPea/Idle/%d.png", 10 } },
+	{ WALLNUT,    { 50,  400, 0.0f, 30.0f,"assets/PlantAnimation/Wallnut/Idle/%d.png", 10 } }
 };
 
 Plant* Plant::create(PlantType type, Vec2 pos, int w, int h)
@@ -84,6 +86,10 @@ void Plant::eventTick(float delta)
 		//发射豌豆
 		m_shouldFire = true;			// 举起“我想开火”的旗子	
 		m_cdTimer = data.cooldown;		//根据品种。重置冷却计时器
+		break;
+	case SNOWPEA:						// 寒冰射手和豌豆射手共用开火逻辑
+		m_shouldFire = true;
+		m_cdTimer = data.cooldown;
 		break;
 	case SUNFLOWER:
 		m_cdTimer = data.cooldown;
