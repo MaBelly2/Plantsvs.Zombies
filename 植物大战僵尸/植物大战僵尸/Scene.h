@@ -25,6 +25,9 @@ private:
 	Scene(const Scene&) = delete;
 	Scene& operator=(const Scene&) = delete;
 
+public:
+	~Scene();
+
 private:
 	IMAGE m_BackgroundImg;		//±³¾°Í¼Æ¬
 

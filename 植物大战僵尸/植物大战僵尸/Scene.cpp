@@ -15,6 +15,49 @@ Scene* Scene::create()
 	return nullptr;
 }
 
+Scene::~Scene()
+{
+	// 1. 清理 UI 卡片
+	for (auto card : m_cards) {
+		delete card;
+	}
+	m_cards.clear();
+
+	// 2. 清理草坪上的手推车
+	for (int i = 0; i < 5; ++i) {
+		if (m_lawnmowers[i] != nullptr) {
+			delete m_lawnmowers[i];
+			m_lawnmowers[i] = nullptr;
+		}
+	}
+
+	// 3. 清理网格上残留的植物
+	for (int i = 0; i < 5; ++i) {
+		for (int j = 0; j < 9; ++j) {
+			if (m_PlantTable[i][j] != nullptr) {
+				delete m_PlantTable[i][j];
+				m_PlantTable[i][j] = nullptr;
+			}
+		}
+	}
+
+	// 4. 清理残余的僵尸、子弹和阳光
+	for (auto zombie : m_zombies) {
+		delete zombie;
+	}
+	m_zombies.clear();
+
+	for (auto bullet : m_bullets) {
+		delete bullet;
+	}
+	m_bullets.clear();
+
+	for (auto sun : m_suns) {
+		delete sun;
+	}
+	m_suns.clear();
+}
+
 bool Scene::init()
 {
 	// 播放背景音乐
@@ -118,7 +161,7 @@ void Scene::drawTick()
 		POINT pt;
 		GetCursorPos(&pt);
 		ScreenToClient(GetHWnd(), &pt);
-		putimage(pt.x - 30, pt.y - 30, &m_ShovelImg);
+		putimage_alpha(pt.x - 30, pt.y - 30, &m_ShovelImg);
 	}
 
 	// 11. 结算画面的文字渲染
