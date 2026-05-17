@@ -129,22 +129,6 @@ void Zombie::loadAnimationFrames(vector<IMAGE*>& frames, const char* pathFormat,
 	for (int i = 0; i < frameCount; ++i) {
 		char path[256];
 		sprintf_s(path, pathFormat, i);
-		//
-		//if (m_type == NORMAL_ZOMBIE) {
-		//	IMAGE* img = new IMAGE();
-		//	loadimage(img, path);	
-		//	frames.push_back(img); // 直接把图片塞进动画数组
-
-		//}
-		//else {
-  //          IMAGE* img1 = new IMAGE();
-		//	loadimage(img1, path,m_width,m_height);
-		//	frames.push_back(img1); // 直接把图片塞进动画数组
-
-		//}	
-
-				// 普通僵尸图片 不缩放
-
 		switch (m_type) {
 		case NORMAL_ZOMBIE: {
 			IMAGE* img = new IMAGE();
