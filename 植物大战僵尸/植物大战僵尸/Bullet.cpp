@@ -27,6 +27,8 @@ bool Bullet::init(Vec2 pos, int w, int h)
     m_speed = 0.1f;
     m_attack = 20;
 
+    m_isActive = true;
+
     // 从配置表中查出当前子弹品种的数据
     BulletData data = g_BulletConfig[m_type];
 

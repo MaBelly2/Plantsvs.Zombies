@@ -112,6 +112,12 @@ bool Scene::init()
 	m_zombiesGenerated = 0;
 	m_maxZombies = 10;
 
+	// 【修复】：补充所有计时器的初始值
+	m_zombieTimer = 0.0f;
+	m_zombieInterval = 5.0f;  // 首只僵尸5秒后出，之后越来越快
+	m_skySunTimer = 0.0f;
+	m_skySunInterval = 8.0f;  // 每8秒掉落一次阳光
+
 	return true;
 }
 
