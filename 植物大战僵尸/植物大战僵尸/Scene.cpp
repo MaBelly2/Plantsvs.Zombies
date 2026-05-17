@@ -210,7 +210,10 @@ void Scene::eventTick(float delta)
 			// 【融合点】根据你的计算微调高度
 			int spawnY = 100 + row * 118 - 25;
 
-			Zombie* z = Zombie::create(NORMAL_ZOMBIE, Vec2(1280, spawnY), 80, 100);
+			Zombie* z = Zombie::create(NORMAL_ZOMBIE, Vec2(1280, spawnY), 80, 120);
+			//Zombie* z = Zombie::create(POLE_VAULTING_ZOMBIE, Vec2(1280, spawnY), 230, 180);
+			//Zombie* z = Zombie::create(FOOTBALL_ZOMBIE, Vec2(1280, spawnY), 150, 150);
+
 			if (z) {
 				m_zombies.push_back(z);
 			}

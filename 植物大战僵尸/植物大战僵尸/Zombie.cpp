@@ -76,7 +76,7 @@ bool Zombie::init(Vec2 pos, int w, int h)
 
 	// 根据僵尸类型初始化特殊状态
 	m_hashelmet = (m_type == FOOTBALL_ZOMBIE);
-	m_haspole = (m_type == POLE_VAULTING_ZOMBIE);
+	m_haspole = (m_type == POLE_VAULTING_ZOMBIE);//撑杆僵尸初始有杆
 	m_plantAhead = false;
 	m_hasjump = false;
 
@@ -92,6 +92,14 @@ bool Zombie::init(Vec2 pos, int w, int h)
 	m_attackInterval = data.attackInterval;
 	m_originalSpeed = data.moveSpeed; // 【新增】保存原始速度
 
+	// ====================== 【强制僵尸对齐格子垂直位置】 ======================
+	int row, col;
+	getGridPosition(row, col);
+
+	// 标准格子参数
+	const int GRID_START_Y = 100;
+	const int CELL_HEIGHT = 118;
+	m_pos.y = GRID_START_Y + row * CELL_HEIGHT + CELL_HEIGHT - m_height;
 	//上传所有图片
 	loadAllAnimation();
 	return true;
@@ -131,14 +139,18 @@ void Zombie::loadAnimationFrames(vector<IMAGE*>& frames, const char* pathFormat,
 	for (int i = 0; i < frameCount; ++i) {
 		char path[256];
 		sprintf_s(path, pathFormat, i);
-		IMAGE* img = new IMAGE();  // 【修改】：使用动态分配
-		
-		// 强行加载并跳过失败判定
-		loadimage(img, path);
-		frames.push_back(img); // 直接把图片塞进动画数组
+		if (m_type == NORMAL_ZOMBIE) {
+			IMAGE* img = new IMAGE();
+			loadimage(img, path);
+			frames.push_back(img); // 直接把图片塞进动画数组
+		}
+		else {
+			IMAGE* img1 = new IMAGE();
+			loadimage(img1, path,m_width,m_height);
+			frames.push_back(img1);
+		}
 	}
 }
-
 void Zombie::drawTick()
 {
 	// 根据状态画不同的序列帧
@@ -148,13 +160,10 @@ void Zombie::drawTick()
 		if (m_type == FOOTBALL_ZOMBIE && m_hashelmet == false) {
 			useSpecialEat = true;
 		}
-		else {
-			useSpecialEat = false;
-		}
 		if (useSpecialEat == true && !m_eatSpecialFrames.empty()) {
 			putimage_alpha(m_pos.x, m_pos.y, m_eatSpecialFrames[m_curFrame]);
 		}
-		else if (!m_eatFrames.empty()) {
+		else {
 			putimage_alpha(m_pos.x, m_pos.y, m_eatFrames[m_curFrame]);
 		}
 	}
@@ -167,9 +176,7 @@ void Zombie::drawTick()
 		else if (m_type == POLE_VAULTING_ZOMBIE && m_haspole == true) {
 			useSpecialWalk = true;
 		}
-		else if (m_type == NORMAL_ZOMBIE) {
-			useSpecialWalk = false;
-		}
+
 		if (useSpecialWalk == true && !m_walkSpecialFrames.empty()) {
 			putimage_alpha(m_pos.x, m_pos.y, m_walkSpecialFrames[m_curFrame]);
 		}
@@ -185,6 +192,7 @@ void Zombie::drawTick()
 
 	}
 }
+
 
 void Zombie::getGridPosition(int& row, int& col) {
 	// ================= 【修复点1】统一采用精确测量的网格刻度 =================
@@ -243,7 +251,7 @@ void Zombie::eventTick(float delta)
 				m_plantAhead = false;
 				m_hasjump = true;
 				m_curFrame = 0;
-				m_animTimer = 0.1f; // 保证立马切入跳跃第一帧
+				m_animTimer = 0.0f; 
 			}
 
 			if (m_state == JUMP) {
@@ -252,13 +260,20 @@ void Zombie::eventTick(float delta)
 					m_animTimer -= 0.1f;
 					m_curFrame++;
 				}
-				if (m_curFrame >= m_jumpFrames.size()) {
+
+
+				if (!m_jumpFrames.empty()&&m_curFrame >= m_jumpFrames.size()) {
+					m_pos.x -= 350.0f;
 					m_haspole = false;
+					m_hasjump = true;
 					setState(WALK);
 					m_moveSpeed *= 1.5f;
+					m_curFrame = 0;
+					m_animTimer = 0.0f;
 				}
+				break;
 			}
-			else if (m_state == WALK) {
+			if (m_state == WALK) {
 				m_moveTimer += sec;
 				float speed = m_haspole ? (m_moveSpeed * 1.5f) : m_moveSpeed;
 				while (m_moveTimer >= speed) {

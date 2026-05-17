@@ -1,6 +1,6 @@
 #pragma once
 #include "GameObject.h"
-
+#include<easyx.h>
 //僵尸类型枚举
 //C：根据想要添加的僵尸名称，在这里丰富枚举类型
 enum ZombieType {
@@ -53,7 +53,6 @@ private:
 
 	int m_curFrame = 0;
 	float m_animTimer = 0.0f;
-
 private:
 	ZombieType m_type;
 	float m_moveSpeed;	//移动速度
