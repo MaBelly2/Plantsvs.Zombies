@@ -209,11 +209,24 @@ void Scene::eventTick(float delta)
 
 			// 【融合点】根据你的计算微调高度
 			int spawnY = 100 + row * 118 - 25;
-
-			Zombie* z = Zombie::create(NORMAL_ZOMBIE, Vec2(1280, spawnY), 80, 120);
-			//Zombie* z = Zombie::create(POLE_VAULTING_ZOMBIE, Vec2(1280, spawnY), 230, 180);
+/*
+			//Zombie* z = Zombie::create(NORMAL_ZOMBIE, Vec2(1280, spawnY), 80, 120);
+			Zombie* z = Zombie::create(BUCKETHEAD_ZOMBIE, Vec2(1280, spawnY), 230, 180);
 			//Zombie* z = Zombie::create(FOOTBALL_ZOMBIE, Vec2(1280, spawnY), 150, 150);
 
+
+			*/
+			int type = rand() % 100;
+			Zombie* z = nullptr;
+			if (type < 60) {
+				z = Zombie::create(NORMAL_ZOMBIE, Vec2(1280, spawnY), 80, 120);       // 60%
+			}
+			else if (type < 85) {
+				z = Zombie::create(BUCKETHEAD_ZOMBIE, Vec2(1280, spawnY), 230, 180);  // 25%
+			}
+			else {
+				z = Zombie::create(FOOTBALL_ZOMBIE, Vec2(1280, spawnY), 200, 200);    // 15%
+			}
 			if (z) {
 				m_zombies.push_back(z);
 			}
@@ -437,7 +450,6 @@ void Scene::checkCollision(float delta)
 	// 2. 僵尸吃植物
 	for (auto zombie : m_zombies) {
 		if (zombie->isDead()) continue;
-		if (zombie->getState() == JUMP) continue;	// 如果僵尸正在跳跃，则不能啃咬植物，直接跳过
 
 		// ================= 【修复点2】获取僵尸所在的准确行 =================
 		int zRow, zCol;
@@ -481,26 +493,22 @@ void Scene::checkCollision(float delta)
 		}
 	}
 
-	// 3. 撑杆僵尸跳跃侦测
-	for (auto zombie : m_zombies) {
-		if (zombie->getType() == POLE_VAULTING_ZOMBIE) {
-			int zombieRow, zombieCol;
-			zombie->getGridPosition(zombieRow, zombieCol);
-			int frontCol = zombieCol - 1;
-			if (frontCol >= 0 && m_PlantTable[zombieRow][frontCol] != nullptr) {
-				zombie->setPlantAhead(true);
-			}
-		}
-	}
 
-	// 4. 推车碾压僵尸
+
+	// 3. 推车碾压僵尸
 	for (int i = 0; i < 5; ++i) {
 		Lawnmower* lm = m_lawnmowers[i];
 		if (!lm) continue;
 
 		for (auto zombie : m_zombies) {
 			if (zombie->isDead()) continue;
+			//先判断是否在同一行
+			int lawnmowerRow=i;
+			int zombieRow;
+			int zombieCol;
+			zombie->getGridPosition(zombieRow, zombieCol);
 
+			if (lawnmowerRow != zombieRow) continue;  // 不同行直接跳过
 			bool isOverlap = !(
 				lm->getPos().x + lm->getWidth() < zombie->getPos().x ||
 				zombie->getPos().x + zombie->getWidth() < lm->getPos().x ||

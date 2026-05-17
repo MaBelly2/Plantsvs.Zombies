@@ -6,9 +6,9 @@
 // 从网上找图片下载到assets文件夹中，重命名，并在这里填写路径，设置移动速度等】
 static std::map<ZombieType, ZombieData> g_ZombieConfig = {
 	// 类型            血量  移速   攻击力  攻击间隔 图片路径
-	{ NORMAL_ZOMBIE, { 100,0.02f,10,2.0f,"assets/Zombies/Normal Zombies" } },	//根据具体路径改一下，这里仅是示例
-	{ FOOTBALL_ZOMBIE, { 800,0.04f,10,2.0f,"assets/Zombies/Football Zombies" } },
-	{ POLE_VAULTING_ZOMBIE, { 100,0.08f,10,2.0f,"assets/Zombies/Pole Vaulting Zombies" } },
+	{ NORMAL_ZOMBIE, { 100,0.04f,10,2.0f,"assets/Zombies/Normal Zombies" } },	//根据具体路径改一下，这里仅是示例
+	{ FOOTBALL_ZOMBIE, { 400,0.03f,10,2.0f,"assets/Zombies/Football Zombies" } },
+	{ BUCKETHEAD_ZOMBIE, { 200,0.03f,10,2.0f,"assets/Zombies/Buckethead Zombies" } },
 };
 
 Zombie* Zombie::create(ZombieType type, Vec2 pos, int w, int h)
@@ -52,12 +52,6 @@ Zombie::~Zombie()
 		delete img;
 	}
 	m_dieFrames.clear();
-
-	// 6. 清理跳跃动画帧
-	for (auto img : m_jumpFrames) {
-		delete img;
-	}
-	m_jumpFrames.clear();
 }
 
 bool Zombie::init(Vec2 pos, int w, int h)
@@ -76,10 +70,7 @@ bool Zombie::init(Vec2 pos, int w, int h)
 
 	// 根据僵尸类型初始化特殊状态
 	m_hashelmet = (m_type == FOOTBALL_ZOMBIE);
-	m_haspole = (m_type == POLE_VAULTING_ZOMBIE);//撑杆僵尸初始有杆
-	m_plantAhead = false;
-	m_hasjump = false;
-
+	m_hasbucket = (m_type == BUCKETHEAD_ZOMBIE);
 	// 1. 从配置表中查出当前僵尸品种的数据
 	ZombieData data = g_ZombieConfig[m_type];
 
@@ -110,7 +101,6 @@ void Zombie::loadAllAnimation() {
 	m_walkSpecialFrames.clear();
 	m_eatFrames.clear();
 	m_eatSpecialFrames.clear();
-	m_jumpFrames.clear();
 	switch (m_type) {
 	case NORMAL_ZOMBIE:
 		loadAnimationFrames(m_walkFrames, "assets/Zombies/Normal Zombies/Walking/%d.png", 10);
@@ -118,18 +108,18 @@ void Zombie::loadAllAnimation() {
 		loadAnimationFrames(m_dieFrames, "assets/Zombies/Normal Zombies/Dead/%d.png", 10);
 		break;
 	case FOOTBALL_ZOMBIE:
-		loadAnimationFrames(m_walkFrames, "assets/Zombies/Football Zombies/Walking/%d.png", 10);
-		loadAnimationFrames(m_walkSpecialFrames, "assets/Zombies/Football Zombies/Helmetless Walking/%d.png", 10);
-		loadAnimationFrames(m_eatFrames, "assets/Zombies/Football Zombies/Attack/%d.png", 10);
-		loadAnimationFrames(m_eatSpecialFrames, "assets/Zombies/Football Zombies/Helmetless Attack/%d.png", 10);
+		loadAnimationFrames(m_walkFrames, "assets/Zombies/Football Zombies/Helmetless Walking/%d.png", 10);
+		loadAnimationFrames(m_walkSpecialFrames, "assets/Zombies/Football Zombies/Walking/%d.png", 10);
+		loadAnimationFrames(m_eatFrames, "assets/Zombies/Football Zombies/Helmetless Attack/%d.png", 10);
+		loadAnimationFrames(m_eatSpecialFrames, "assets/Zombies/Football Zombies/Attack/%d.png", 10);
 		loadAnimationFrames(m_dieFrames, "assets/Zombies/Football Zombies/Dead/%d.png", 8);
 		break;
-	case POLE_VAULTING_ZOMBIE:
-		loadAnimationFrames(m_walkFrames, "assets/Zombies/Pole Vaulting Zombies/Poleless Walking/%d.png", 10);
-		loadAnimationFrames(m_walkSpecialFrames, "assets/Zombies/Pole Vaulting Zombies/Walking/%d.png", 10);
-		loadAnimationFrames(m_eatFrames, "assets/Zombies/Pole Vaulting Zombies/Attack/%d.png", 10);
-		loadAnimationFrames(m_dieFrames, "assets/Zombies/Pole Vaulting Zombies/Dead/%d.png", 10);
-		loadAnimationFrames(m_jumpFrames, "assets/Zombies/Pole Vaulting Zombies/Jump/%d.png", 10);
+	case BUCKETHEAD_ZOMBIE:
+		loadAnimationFrames(m_walkFrames, "assets/Zombies/Normal Zombies/Walking/%d.png", 10);
+		loadAnimationFrames(m_walkSpecialFrames, "assets/Zombies/Buckethead Zombies/Walking/%d.png", 10);
+		loadAnimationFrames(m_eatFrames, "assets/Zombies/Normal Zombies/Attack/%d.png", 10);
+		loadAnimationFrames(m_eatSpecialFrames, "assets/Zombies/Buckethead Zombies/Attack/%d.png", 10);
+		loadAnimationFrames(m_dieFrames, "assets/Zombies/Normal Zombies/Dead/%d.png", 10);
 		break;
 
 	}
@@ -157,9 +147,13 @@ void Zombie::drawTick()
 
 	if (m_state == EAT && !m_eatFrames.empty()) {
 		bool useSpecialEat = false;
-		if (m_type == FOOTBALL_ZOMBIE && m_hashelmet == false) {
+		if (m_type == FOOTBALL_ZOMBIE && m_hashelmet) {
 			useSpecialEat = true;
 		}
+		if (m_type == BUCKETHEAD_ZOMBIE && m_hasbucket) {
+			useSpecialEat = true;
+		}
+
 		if (useSpecialEat == true && !m_eatSpecialFrames.empty()) {
 			putimage_alpha(m_pos.x, m_pos.y, m_eatSpecialFrames[m_curFrame]);
 		}
@@ -170,10 +164,10 @@ void Zombie::drawTick()
 	else if (m_state == DIE && !m_dieFrames.empty()) putimage_alpha(m_pos.x, m_pos.y, m_dieFrames[m_curFrame]);
 	else if (m_state == WALK) {
 		bool useSpecialWalk = false;
-		if (m_type == FOOTBALL_ZOMBIE && m_hashelmet == false) {
+		if (m_type == FOOTBALL_ZOMBIE && m_hashelmet) {
 			useSpecialWalk = true;
 		}
-		else if (m_type == POLE_VAULTING_ZOMBIE && m_haspole == true) {
+		else if (m_type == BUCKETHEAD_ZOMBIE && m_hasbucket) {
 			useSpecialWalk = true;
 		}
 
@@ -183,13 +177,6 @@ void Zombie::drawTick()
 		else if (!m_walkFrames.empty()) {
 			putimage_alpha(m_pos.x, m_pos.y, m_walkFrames[m_curFrame]);
 		}
-	}
-	else if (m_state == JUMP) {
-		if (!m_jumpFrames.empty()) {
-			putimage_alpha(m_pos.x, m_pos.y, m_jumpFrames[m_curFrame]);
-
-		}
-
 	}
 }
 
@@ -236,7 +223,7 @@ void Zombie::eventTick(float delta)
 	else if (m_hp > 0) {
 		switch (m_type) {
 		case FOOTBALL_ZOMBIE: {
-			if (m_hashelmet && m_hp <= 400) {
+			if (m_hashelmet && m_hp <= 200) {
 				m_hashelmet = false;
 				m_moveSpeed *= 0.7f;		//m_moveSpeed 实际上是步频的冷却时间，数值越小越快
 				m_attackInterval *= 0.8f;
@@ -244,43 +231,15 @@ void Zombie::eventTick(float delta)
 			}
 			break;
 		}
-		case POLE_VAULTING_ZOMBIE: {
-			// 跳跃条件判断
-			if (m_haspole && m_plantAhead && !m_hasjump && m_state != JUMP) {
-				setState(JUMP);
-				m_plantAhead = false;
-				m_hasjump = true;
-				m_curFrame = 0;
-				m_animTimer = 0.0f; 
+		case BUCKETHEAD_ZOMBIE: {
+			if (m_hasbucket && m_hp <= 100) {
+				m_hasbucket = false;
+				m_moveSpeed *= 0.8f;
+				m_attackInterval *= 0.8f;
+				m_attackDamage *= 1.5f;
+
 			}
 
-			if (m_state == JUMP) {
-				m_animTimer += sec;
-				if (m_animTimer >= 0.1f) {
-					m_animTimer -= 0.1f;
-					m_curFrame++;
-				}
-
-
-				if (!m_jumpFrames.empty()&&m_curFrame >= m_jumpFrames.size()) {
-					m_pos.x -= 350.0f;
-					m_haspole = false;
-					m_hasjump = true;
-					setState(WALK);
-					m_moveSpeed *= 1.5f;
-					m_curFrame = 0;
-					m_animTimer = 0.0f;
-				}
-				break;
-			}
-			if (m_state == WALK) {
-				m_moveTimer += sec;
-				float speed = m_haspole ? (m_moveSpeed * 1.5f) : m_moveSpeed;
-				while (m_moveTimer >= speed) {
-					m_moveTimer -= speed;
-					m_pos.x -= 1;
-				}
-			}
 			break;
 		}
 		default:
@@ -288,12 +247,12 @@ void Zombie::eventTick(float delta)
 		}
 
 		// 吃植物状态切换
-		if (m_isEating && m_state != JUMP) setState(EAT);
+		if (m_isEating) setState(EAT);
 		else if (!m_isEating && m_state == EAT)
 			setState(WALK);
 
 		// 普通僵尸移动更新（死人不能动，所以留在这里面）
-		if (m_state == WALK && m_type != POLE_VAULTING_ZOMBIE) {
+		if (m_state == WALK) {
 			m_moveTimer += sec;
 			while (m_moveTimer >= m_moveSpeed) {
 				m_moveTimer -= m_moveSpeed;
@@ -304,7 +263,6 @@ void Zombie::eventTick(float delta)
 
 	// ================= 【修复点1】将动画更新独立到外面 =================
 	// 无论僵尸活着还是死了，都要播放对应的动画！
-	if (m_state != JUMP) {
 		m_animTimer += sec;
 		if (m_animTimer >= 0.15f) { // 0.15秒切一帧
 			m_animTimer = 0;
@@ -324,7 +282,7 @@ void Zombie::eventTick(float delta)
 				if (m_eatFrames.size() > 0 && m_curFrame >= m_eatFrames.size()) m_curFrame = 0;
 			}
 		}
-	}
+	
 }
 
 void Zombie::setType(ZombieType type){
