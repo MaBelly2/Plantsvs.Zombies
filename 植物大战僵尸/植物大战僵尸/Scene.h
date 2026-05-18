@@ -33,6 +33,10 @@ private:
 
 	IMAGE m_ShovelSlotImg;		// 放在屏幕顶部的铲子槽位图标
 	IMAGE m_ShovelImg;			// 拿在手里、跟着鼠标移动的铲子图片
+	IMAGE m_StartImg;     // 游戏开始封面图
+	bool m_isGameStart;   // 是否已经点击开始
+	IMAGE m_GameOverImg;       //游戏失败结束画面
+	IMAGE m_WinImg;
 
 	Plant* m_PlantTable[5][9];	//植物表格 这里只能指针 因为构造函数被封了
 	vector<Zombie*> m_zombies;	//添加容器存放活动的僵尸和子弹

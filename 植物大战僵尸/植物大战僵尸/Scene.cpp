@@ -65,11 +65,17 @@ bool Scene::init()
 	mciSendString("play bgm repeat", NULL, 0, NULL);
 
 	loadimage(&m_BackgroundImg, "assets/DaytimeBackground.jpg", 1280, 720);
-
+	// 加载游戏开始封面图
+	loadimage(&m_StartImg, "assets/StartBg.png", 800, 450);
+	// 初始状态：还没点击开始
+	m_isGameStart = false;
 	// ====== 加载铲子图片 ======
 	loadimage(&m_ShovelSlotImg, "assets/PlantShovel.png", 60, 60);
 	loadimage(&m_ShovelImg, "assets/PlantShovel.png", 60, 60);
 
+	//游戏结束图片
+	loadimage(&m_GameOverImg, "assets/GameOverBg.png", 800, 450);
+	loadimage(&m_WinImg, "assets/WinBg.png", 180, 180);
 	// 初始化植物网格
 	for (int i = 0; i < 5; ++i) {
 		for (int j = 0; j < 9; ++j) {
@@ -121,10 +127,22 @@ bool Scene::init()
 	return true;
 }
 
+
 void Scene::drawTick()
 {
-	// 1. 绘制背景
 	putimage_alpha(0, 0, &m_BackgroundImg);
+
+	// ========== 新增：没点击开始时，在背景上面叠一张缩小的开始图 ==========
+	if (!m_isGameStart)
+	{
+		// 计算居中绘制，800x500 小图盖在中间，四周露出背景
+		int x = (1280 - 800) / 2;
+		int y = (720 - 450) / 2;
+		putimage_alpha(x, y, &m_StartImg);
+
+		// 直接return，不渲染植物、僵尸、卡片这些
+		return;
+	}
 
 	// 2. 绘制顶部的所有卡片（卡片内部自动处理冷却遮罩层）
 	for (auto card : m_cards) {
@@ -156,6 +174,7 @@ void Scene::drawTick()
 	for (auto sun : m_suns) sun->drawTick();
 
 	// 9. 【融合点】渲染 UI：阳光数量
+	setbkmode(TRANSPARENT);
 	settextcolor(YELLOW);
 	settextstyle(24, 0, "微软雅黑", 0, 0, FW_BOLD, false, false, false);
 	char sunText[32];
@@ -170,25 +189,34 @@ void Scene::drawTick()
 		putimage_alpha(pt.x - 30, pt.y - 30, &m_ShovelImg);
 	}
 
-	// 11. 结算画面的文字渲染
+	// 11. 结算画面
 	if (m_status == GAME_OVER) {
-		setfillcolor(DARKGRAY);
-		solidrectangle(0, 0, 1280, 720);
-		settextcolor(RED);
-		settextstyle(100, 0, "微软雅黑", 0, 0, FW_BOLD, false, false, false);
-		const char* text = "僵尸吃掉了你的脑子！";
-		outtextxy((1280 - textwidth(text)) / 2, (720 - textheight(text)) / 2, text);
+		putimage_alpha(200, 140, &m_GameOverImg);
 	}
 	else if (m_status == WIN) {
 		settextcolor(YELLOW);
 		settextstyle(120, 0, "微软雅黑", 0, 0, FW_BOLD, false, false, false);
 		const char* text = "通 关 ！";
 		outtextxy((1280 - textwidth(text)) / 2, (720 - textheight(text)) / 2, text);
+		putimage_alpha(500, 450, &m_WinImg);
 	}
 }
 
 void Scene::eventTick(float delta)
 {
+	if (!m_isGameStart)
+	{
+		ExMessage msg;
+		while (peekmessage(&msg, EX_MOUSE))
+		{
+			// 按下鼠标左键，正式开始游戏
+			if (msg.message == WM_LBUTTONDOWN)
+			{
+				m_isGameStart = true;
+			}
+		}
+		return;
+	}
 	if (m_status != PLAYING) {
 		return;
 	}
