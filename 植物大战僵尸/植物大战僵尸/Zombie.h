@@ -1,20 +1,19 @@
 #pragma once
 #include "GameObject.h"
-
+#include<easyx.h>
 //僵尸类型枚举
 //C：根据想要添加的僵尸名称，在这里丰富枚举类型
 enum ZombieType {
 	NORMAL_ZOMBIE,		//普通僵尸
 	FOOTBALL_ZOMBIE,    //橄榄球僵尸
-	POLE_VAULTING_ZOMBIE //撑杆僵尸
+	BUCKETHEAD_ZOMBIE //僵尸
 };
 
 //僵尸状态枚举
 enum ZombieState {
 	WALK,
 	EAT,
-	DIE,
-	JUMP
+	DIE
 };
 
 // 定义一个僵尸数据的结构体
@@ -39,9 +38,7 @@ private:
 	ZombieState m_state = WALK;		// 默认走路
 	bool m_isRemovable = false;		// 死亡动画是否播完？播完才能从内存中清理
 	bool m_hashelmet = true;
-	bool m_haspole = true;
-	bool m_plantAhead = false;
-	bool m_hasjump = false;
+	bool m_hasbucket = true;
 
 	//动画相关
 	vector<IMAGE*> m_walkFrames;
@@ -49,11 +46,9 @@ private:
 	vector<IMAGE*> m_eatFrames;
 	vector<IMAGE*> m_eatSpecialFrames;
 	vector<IMAGE*> m_dieFrames;
-	vector<IMAGE*> m_jumpFrames;
 
 	int m_curFrame = 0;
 	float m_animTimer = 0.0f;
-
 private:
 	ZombieType m_type;
 	float m_moveSpeed;	//移动速度
@@ -76,10 +71,7 @@ public:
 	static Zombie* create(ZombieType type, Vec2 pos, int w, int h);
 
 	bool init(Vec2 pos, int w, int h) override;	//override 检查是否在重写一个虚函数
-	
-	void setPlantAhead(bool ahead) {
-		m_plantAhead = ahead;
-	}
+
 	void getGridPosition(int& row, int& col);
 	void drawTick()override;
 	void eventTick(float delta)override;
