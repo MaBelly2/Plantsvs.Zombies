@@ -6,8 +6,8 @@
 enum PlantType {
 	PEASHOOTER,	// 豌豆射手
 	SUNFLOWER,	// 向日葵
-	SNOWPEA,
-	WALLNUT
+	SNOWPEA,	//寒冰射手
+	WALLNUT		//坚果
 };
 
 // 定义一个植物数据的结构体
